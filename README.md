@@ -1,9 +1,5 @@
-# Frontend Pages Showcase
+# 外来物种哨兵
 
-This repository is generated from local static frontend candidates.
+Public static showcase for the 外来物种哨兵 project.
 
-- Published entries: 6
-- Skipped categories: 8
-- Generated at: 2026-06-09 18:18:58 +08:00
-
-The root index.html links to each static page under sites/.
+This GitHub Pages site intentionally publishes only the external-facing project page. Internal dashboards, scan reports, local control panels, templates, and private run logs are not part of the public site.
