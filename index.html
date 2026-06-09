@@ -3,6 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' fill='%23486b55'/%3E%3Cpath d='M14 43h36v7H14zM17 14h30v7H24v9h20v7H24v13h-7z' fill='%23fbfaf6'/%3E%3C/svg%3E">
   <title>Frontend Pages Showcase</title>
   <style>
     :root {
@@ -177,7 +178,7 @@
   </header>
   <main>
     <section class="stats" aria-label="Publish summary">
-      <div class="stat"><strong>8</strong><span>已发布入口</span></div>
+      <div class="stat"><strong>7</strong><span>已发布入口</span></div>
       <div class="stat"><strong>7</strong><span>默认跳过类别</span></div>
       <div class="stat"><strong>0</strong><span>原项目文件被修改</span></div>
     </section>
@@ -189,14 +190,6 @@
             <p>包含图片 assets，已排除本地日志文件。</p>
           </div>
           <a class="open-link" href="sites/invasive-species-showcase/" aria-label="Open 外来物种哨兵 项目展示">打开</a>
-        </article>
-        <article class="project-card">
-          <div>
-            <p class="eyebrow">Vite dist</p>
-            <h2>Skill Manager 静态构建</h2>
-            <p>使用已有 dist，并修正 Vite 根路径资源为相对路径；数据功能可能依赖后端 API。</p>
-          </div>
-          <a class="open-link" href="sites/skill-manager/" aria-label="Open Skill Manager 静态构建">打开</a>
         </article>
         <article class="project-card">
           <div>
@@ -220,7 +213,7 @@
             <h2>HTML 模板画廊</h2>
             <p>包含模板画廊和两个模板页面，仅复制公开浏览所需文件。</p>
           </div>
-          <a class="open-link" href="sites/frontend-output-guidelines/" aria-label="Open HTML 模板画廊">打开</a>
+          <a class="open-link" href="sites/frontend-output-guidelines/template-gallery/" aria-label="Open HTML 模板画廊">打开</a>
         </article>
         <article class="project-card">
           <div>
@@ -258,7 +251,7 @@
       <tr><td>Documents/Codex/.../edge-bookmarks.html</td><td>浏览器书签导出，含个人浏览信息，默认不公开。</td></tr>
       <tr><td>source/repos/cc-switch-main/deplink.html</td><td>深链接测试页包含示例 API key、token 字段和可复制导入链接，默认跳过。</td></tr>
       <tr><td>source/repos/cc-switch-main/src/index.html</td><td>Tauri/Vite 源入口，不能脱离构建产物单独发布。</td></tr>
-      <tr><td>source/repos/skill-manager/index.html</td><td>根入口会跳转到本机开发服务器，改用 dist 静态构建发布。</td></tr>
+      <tr><td>source/repos/skill-manager/index.html + dist</td><td>根入口会跳转到本机开发服务器；dist 静态版会请求后端 API，未做 mock 前不公开。</td></tr>
       <tr><td>Documents/Codex/.../paper-starter/paper.html</td><td>论文模板带 Quarto 依赖目录且可能是草稿，默认不公开。</td></tr>
       <tr><td>Documents/Codex/.../project-forge/output/*.html</td><td>多处页面含本机绝对路径、内部流程文字或 secret/token/auth 演示内容，默认不公开。</td></tr>
 
