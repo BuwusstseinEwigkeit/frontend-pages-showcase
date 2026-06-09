@@ -1,0 +1,1587 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>外来物种哨兵 | 项目展示</title>
+  <meta name="description" content="外来物种哨兵：公众参与式外来入侵物种上报与审核系统。" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='18' fill='%23155f3f'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-size='24' font-family='Georgia' font-weight='700' fill='white'%3EIS%3C/text%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;800;900&family=Noto+Serif+SC:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --ink: #0e211b;
+      --muted: #52665d;
+      --paper: #f2f5ec;
+      --warm: #fff9ec;
+      --forest: #155f3f;
+      --leaf: #2c9362;
+      --moss: #a9c06e;
+      --gold: #dca43a;
+      --blue: #0a4a94;
+      --night: #071611;
+      --line: rgba(14, 33, 27, .16);
+      --glass: rgba(255, 250, 238, .84);
+      --shadow: 0 24px 80px rgba(12, 32, 26, .18);
+      --font-sans: "Noto Sans SC", "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+      --font-display: "Noto Serif SC", "Microsoft YaHei UI", "Microsoft YaHei", serif;
+      font-family: var(--font-sans);
+      color: var(--ink);
+      background: var(--paper);
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: auto; }
+    body {
+      margin: 0;
+      overflow-x: hidden;
+      font-family: var(--font-sans);
+      font-weight: 500;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+      background:
+        linear-gradient(90deg, rgba(21,95,63,.08) 1px, transparent 1px),
+        linear-gradient(rgba(21,95,63,.06) 1px, transparent 1px),
+        radial-gradient(circle at 16% 4%, rgba(220,164,58,.16), transparent 30rem),
+        radial-gradient(circle at 84% 12%, rgba(10,74,148,.14), transparent 34rem),
+        var(--paper);
+      background-size: 64px 64px, 64px 64px, auto, auto, auto;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 40;
+      opacity: .16;
+      background-image:
+        linear-gradient(115deg, transparent 0, rgba(255,255,255,.55) 46%, transparent 49%),
+        repeating-radial-gradient(circle at 20% 10%, rgba(14,33,27,.11), rgba(14,33,27,.11) 1px, transparent 1px, transparent 5px);
+      mix-blend-mode: soft-light;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    .shell { width: min(1180px, calc(100% - 48px)); margin: 0 auto; }
+    .cursor-glow, .cursor-orb, .cursor-ring {
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 90;
+      pointer-events: none;
+      border-radius: 999px;
+      mix-blend-mode: normal;
+      opacity: 0;
+      will-change: transform, opacity;
+    }
+    .cursor-glow {
+      z-index: 39;
+      width: 420px;
+      height: 420px;
+      background: radial-gradient(circle, rgba(255,255,255,.35), rgba(255,255,255,0) 62%);
+      mix-blend-mode: soft-light;
+    }
+    .cursor-orb {
+      width: 11px;
+      height: 11px;
+      background: var(--gold);
+      box-shadow: 0 0 30px rgba(220,164,58,.55), 0 0 0 9px rgba(220,164,58,.08);
+    }
+    .cursor-ring {
+      width: 54px;
+      height: 54px;
+      border: 1px solid rgba(21,95,63,.38);
+      background: radial-gradient(circle, rgba(255,249,236,.22), rgba(255,249,236,.04) 68%);
+      box-shadow: 0 12px 36px rgba(21,95,63,.12), inset 0 0 0 1px rgba(255,255,255,.2);
+      backdrop-filter: blur(3px);
+    }
+    .read-progress {
+      position: fixed;
+      top: 0;
+      left: 0;
+      z-index: 80;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(90deg, var(--forest), var(--gold), var(--blue));
+      transform: scaleX(0);
+      transform-origin: left center;
+      will-change: transform;
+    }
+
+    .site-header {
+      position: fixed;
+      top: 18px;
+      left: 50%;
+      z-index: 50;
+      width: min(1180px, calc(100% - 32px));
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 12px 10px 14px;
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 999px;
+      background: rgba(255, 250, 238, .72);
+      box-shadow: 0 18px 54px rgba(15, 41, 32, .13);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; }
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--forest);
+      color: #fff;
+      font-family: Georgia, var(--font-display);
+      font-size: 15px;
+      letter-spacing: .02em;
+    }
+
+    .nav { display: flex; gap: 4px; align-items: center; }
+    .nav a {
+      padding: 9px 14px;
+      border-radius: 999px;
+      color: rgba(14,33,27,.72);
+      font: 800 14px/1 var(--font-sans);
+    }
+    .nav a:hover { background: rgba(21,95,63,.10); color: var(--forest); }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      align-items: center;
+      padding: 126px 0 72px;
+      overflow: clip;
+    }
+
+    .map-lines, .orbit-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .6;
+    }
+    .map-lines svg, .orbit-layer svg { width: 100%; height: 100%; display: block; }
+
+    .hero-grid {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1fr 470px;
+      gap: 48px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      width: fit-content;
+      margin-bottom: 24px;
+      padding: 9px 14px;
+      border-radius: 999px;
+      background: rgba(21,95,63,.12);
+      color: var(--forest);
+      font: 800 14px/1 var(--font-sans);
+    }
+    .eyebrow::before {
+      content: "";
+      width: 9px;
+      height: 9px;
+      border-radius: 999px;
+      background: var(--leaf);
+      box-shadow: 0 0 0 8px rgba(44,147,98,.14);
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(56px, 7.2vw, 104px);
+      line-height: 1.02;
+      letter-spacing: 0;
+      font-family: var(--font-sans);
+      font-weight: 900;
+      color: var(--forest);
+    }
+    .title-line {
+      display: inline-block;
+      white-space: nowrap;
+    }
+    .title-line + .title-line { margin-left: .08em; }
+    .split-word {
+      display: inline-block;
+      transform-origin: 50% 78%;
+      text-shadow: 0 14px 42px rgba(21,95,63,.13);
+    }
+    .nowrap { white-space: nowrap; }
+    .hero-sub {
+      max-width: 650px;
+      margin: 28px 0 0;
+      font: 900 clamp(23px, 3vw, 38px)/1.32 var(--font-sans);
+      color: var(--ink);
+    }
+    .hero-copy {
+      max-width: 640px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font: 500 19px/1.9 var(--font-sans);
+    }
+
+    .hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 34px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-height: 48px;
+      padding: 0 20px;
+      border-radius: 999px;
+      border: 1px solid rgba(21,95,63,.22);
+      background: var(--forest);
+      color: #fff;
+      font: 800 15px/1 var(--font-sans);
+      box-shadow: 0 16px 44px rgba(21,95,63,.24);
+    }
+    .button.secondary { background: rgba(255,255,255,.58); color: var(--forest); box-shadow: none; }
+    .button:focus-visible, .nav a:focus-visible {
+      outline: 3px solid rgba(220,164,58,.55);
+      outline-offset: 3px;
+    }
+
+    .field-card {
+      position: relative;
+      min-height: 640px;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      background: var(--night);
+      transform-style: preserve-3d;
+    }
+    .field-card:hover { box-shadow: 0 34px 100px rgba(12, 32, 26, .25); }
+    .field-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: .92;
+      filter: saturate(1.08) contrast(1.04);
+    }
+    .field-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(7,22,17,.02), rgba(7,22,17,.56)),
+        linear-gradient(90deg, rgba(7,22,17,.02), rgba(7,22,17,.24));
+    }
+    .scan-ring {
+      position: absolute;
+      right: 48px;
+      top: 78px;
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      border: 1px solid rgba(169,192,110,.55);
+      z-index: 2;
+    }
+    .scan-ring::before, .scan-ring::after {
+      content: "";
+      position: absolute;
+      inset: 20px;
+      border-radius: 50%;
+      border: 1px dashed rgba(255,255,255,.5);
+    }
+    .scan-ring::after { inset: 54px; background: rgba(44,147,98,.24); }
+    .floating-specimen {
+      position: absolute;
+      z-index: 4;
+      width: 132px;
+      aspect-ratio: 1;
+      overflow: hidden;
+      border: 1px solid rgba(255,255,255,.42);
+      border-radius: 8px;
+      background: rgba(255,250,238,.18);
+      box-shadow: 0 24px 58px rgba(0,0,0,.22);
+      backdrop-filter: blur(10px);
+      will-change: transform;
+    }
+    .floating-specimen img { width: 100%; height: 100%; object-fit: cover; position: relative; opacity: 1; filter: saturate(.88) contrast(1.08) sepia(.12); }
+    .floating-specimen::before,
+    .species-tile::before,
+    .lens-card::before,
+    .film-frame::before,
+    .species-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, rgba(7,22,17,.02), rgba(7,22,17,.28)),
+        radial-gradient(circle at 22% 12%, rgba(255,249,236,.16), transparent 28%);
+      mix-blend-mode: soft-light;
+    }
+    .floating-specimen::before,
+    .species-tile::before,
+    .lens-card::before,
+    .film-frame::before {
+      box-shadow: inset 0 0 0 1px rgba(255,249,236,.14), inset 0 -46px 80px rgba(7,22,17,.5);
+    }
+    .floating-specimen::after {
+      content: attr(data-label);
+      position: absolute;
+      left: 8px;
+      right: 8px;
+      bottom: 8px;
+      z-index: 2;
+      color: #fff;
+      font: 800 12px/1.2 var(--font-sans);
+      text-shadow: 0 2px 12px rgba(0,0,0,.52);
+    }
+    .floating-specimen.one { left: -34px; top: 96px; }
+    .floating-specimen.two { right: -28px; top: 300px; width: 116px; }
+    .floating-specimen.three { left: 56px; bottom: 172px; width: 104px; }
+    .hero-stats {
+      position: absolute;
+      left: 28px;
+      right: 28px;
+      bottom: 28px;
+      z-index: 3;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .hero-stat {
+      padding: 17px 16px;
+      border: 1px solid rgba(255,255,255,.2);
+      border-radius: 8px;
+      background: rgba(255,250,238,.14);
+      backdrop-filter: blur(16px);
+      color: #fff;
+    }
+    .hero-stat strong { display: block; font: 900 34px/1 var(--font-sans); }
+    .hero-stat span { display: block; margin-top: 5px; font: 700 13px/1.3 var(--font-sans); color: rgba(255,255,255,.82); }
+
+    .species-strip {
+      position: relative;
+      margin-top: -34px;
+      z-index: 4;
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid rgba(21,95,63,.12);
+      border-radius: 10px;
+      background: linear-gradient(180deg, rgba(7,22,17,.78), rgba(7,22,17,.9));
+      box-shadow: 0 24px 70px rgba(14,33,27,.18);
+    }
+    .species-tile {
+      position: relative;
+      aspect-ratio: .78;
+      min-height: 172px;
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--night);
+      box-shadow: 0 18px 40px rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+    .species-tile img { width: 100%; height: 100%; object-fit: cover; object-position: center; filter: saturate(.62) contrast(1.18) sepia(.22) brightness(.78); }
+    .species-tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background:
+        linear-gradient(180deg, rgba(7,22,17,.30), rgba(7,22,17,.34) 40%, rgba(0,0,0,.78)),
+        repeating-linear-gradient(90deg, rgba(255,255,255,.04), rgba(255,255,255,.04) 1px, transparent 1px, transparent 28px);
+    }
+    .species-tile span {
+      position: absolute;
+      left: 10px;
+      bottom: 10px;
+      right: 10px;
+      color: #fff;
+      text-shadow: 0 2px 12px rgba(0,0,0,.45);
+      font: 700 13px/1.25 var(--font-sans);
+      z-index: 3;
+    }
+
+    section { position: relative; padding: 120px 0; }
+    .section-kicker {
+      color: var(--forest);
+      font: 900 13px/1 var(--font-sans);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+    }
+    .section-title {
+      margin: 0;
+      font: 800 clamp(34px, 4vw, 56px)/1.18 var(--font-sans);
+      letter-spacing: 0;
+      color: var(--ink);
+      max-width: 1000px;
+      text-wrap: balance;
+    }
+    .section-lead {
+      max-width: 780px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font: 500 19px/1.9 var(--font-sans);
+      text-wrap: pretty;
+    }
+
+    .item-visual {
+      position: relative;
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--night);
+      isolation: isolate;
+    }
+    .item-visual img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      filter: saturate(1.05) contrast(1.03);
+      transition: transform .7s cubic-bezier(.2,.7,.2,1), filter .7s cubic-bezier(.2,.7,.2,1);
+    }
+    .item-visual::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, transparent 42%, rgba(7,22,17,.5)),
+        linear-gradient(90deg, rgba(255,255,255,.16), transparent 54%);
+      z-index: 1;
+    }
+    .item-visual:has(img[src*="species-"]) img {
+      filter: saturate(.72) contrast(1.13) sepia(.18) brightness(.9);
+    }
+    .item-visual:has(img[src*="species-"])::after {
+      background:
+        linear-gradient(180deg, rgba(7,22,17,.10), rgba(7,22,17,.22) 44%, rgba(0,0,0,.66)),
+        linear-gradient(90deg, rgba(255,249,236,.12), transparent 54%);
+    }
+    .problem-card:hover .item-visual img,
+    .journey-card:hover .item-visual img,
+    .module:hover .item-visual img,
+    .security-card:hover .item-visual img,
+    .arch-row:hover .item-visual img,
+    .finale-card:hover .item-visual img {
+      transform: scale(1.1);
+      filter: saturate(1.16) contrast(1.06);
+    }
+
+    .problem-grid {
+      margin-top: 52px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .problem-card {
+      min-height: 340px;
+      padding: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background:
+        linear-gradient(180deg, rgba(255,255,255,.72), rgba(255,250,238,.7));
+      box-shadow: 0 18px 58px rgba(14,33,27,.09);
+    }
+    .problem-card .item-visual { height: 156px; margin: -16px -16px 28px; }
+    .problem-card b { display: block; color: var(--forest); font: 900 42px/1 Georgia, var(--font-display); }
+    .problem-card h3 { margin: 22px 0 14px; font: 800 27px/1.26 var(--font-sans); }
+    .problem-card p { margin: 0; color: var(--muted); font: 500 18px/1.84 var(--font-sans); }
+
+    .journey { padding-top: 120px; }
+    .journey-pin { overflow: hidden; }
+    .journey-track {
+      width: min(1180px, calc(100% - 48px));
+      margin: 54px auto 0;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+    .journey-card {
+      min-height: 430px;
+      padding: 24px;
+      border-radius: 8px;
+      background: var(--glass);
+      border: 1px solid rgba(255,255,255,.64);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .journey-card .item-visual { height: 138px; margin-bottom: 22px; }
+    .journey-card .num { font: 900 74px/1 Georgia, var(--font-display); color: rgba(21,95,63,.18); }
+    .journey-card h3 { margin: 0; font: 800 32px/1.22 var(--font-sans); color: var(--forest); }
+    .journey-card p { margin: 16px 0 0; color: var(--muted); font: 500 18px/1.84 var(--font-sans); }
+    .journey-card .line {
+      width: 100%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--forest), rgba(21,95,63,0));
+      transform-origin: left;
+    }
+
+    .evidence {
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(245,239,226,.94), rgba(255,249,236,.72)),
+        radial-gradient(circle at 12% 15%, rgba(220,164,58,.18), transparent 28rem),
+        radial-gradient(circle at 92% 22%, rgba(10,74,148,.12), transparent 30rem);
+    }
+    .scene-mosaic {
+      margin-top: 54px;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr .8fr;
+      gap: 16px;
+      height: 430px;
+    }
+    .scene-card {
+      position: relative;
+      margin: 0;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.58);
+      background: var(--night);
+      box-shadow: 0 22px 70px rgba(14,33,27,.14);
+      isolation: isolate;
+      will-change: transform, opacity;
+    }
+    .scene-card:nth-child(2) { margin-top: 42px; }
+    .scene-card:nth-child(3) { margin-top: 86px; }
+    .scene-card img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      filter: saturate(1.06) contrast(1.02);
+      transform: scale(1.04);
+    }
+    .scene-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      background: linear-gradient(180deg, transparent 36%, rgba(7,22,17,.76));
+    }
+    .scene-card span {
+      position: absolute;
+      left: 22px;
+      right: 22px;
+      bottom: 20px;
+      z-index: 2;
+      color: #fff;
+      font: 800 18px/1.32 var(--font-sans);
+      text-shadow: 0 2px 18px rgba(0,0,0,.44);
+    }
+    .evidence-board {
+      margin-top: 112px;
+      display: grid;
+      grid-template-columns: 1.15fr .85fr;
+      gap: 20px;
+      align-items: stretch;
+    }
+    .specimen-stage {
+      min-height: 660px;
+      border-radius: 8px;
+      position: relative;
+      overflow: hidden;
+      background: #0b2119;
+      box-shadow: var(--shadow);
+      transform-style: preserve-3d;
+    }
+    .specimen-stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(135deg, rgba(7,22,17,.20), rgba(7,22,17,.82)),
+        url("assets/sentinel-map-trust.webp") center/cover;
+      filter: saturate(.92) contrast(1.08) brightness(.78);
+      transform: scale(1.04);
+    }
+    .specimen-stage::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.06) 1px, transparent 1px);
+      background-size: 58px 58px;
+      mask-image: linear-gradient(180deg, rgba(0,0,0,.9), transparent);
+    }
+    .lens-card {
+      position: absolute;
+      z-index: 3;
+      width: 225px;
+      min-height: 255px;
+      padding: 12px;
+      border: 1px solid rgba(255,255,255,.34);
+      border-radius: 8px;
+      background: rgba(255,250,238,.16);
+      box-shadow: 0 24px 80px rgba(0,0,0,.26);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      will-change: transform, opacity;
+      overflow: hidden;
+    }
+    .lens-card img { width: 100%; height: 150px; border-radius: 6px; object-fit: cover; filter: saturate(.72) contrast(1.14) sepia(.18) brightness(.9); }
+    .lens-card strong, .lens-card span { position: relative; z-index: 2; }
+    .lens-card strong { display: block; margin-top: 12px; font: 800 19px/1.2 var(--font-sans); }
+    .lens-card span { display: block; margin-top: 7px; color: rgba(255,255,255,.78); font: 700 12px/1.45 var(--font-sans); }
+    .lens-card:nth-child(1) { left: 42px; top: 46px; }
+    .lens-card:nth-child(2) { right: 54px; top: 86px; }
+    .lens-card:nth-child(3) { left: 235px; top: 230px; }
+    .lens-card:nth-child(4) { right: 118px; bottom: 54px; }
+    .scanline {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 18%;
+      z-index: 4;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(169,192,110,.9), transparent);
+      box-shadow: 0 0 24px rgba(169,192,110,.72);
+      will-change: transform;
+    }
+    .evidence-side {
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 20px;
+    }
+    .evidence-feature, .badge-rack {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: rgba(255,250,238,.72);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .evidence-feature img { width: 100%; height: 310px; object-fit: cover; display: block; }
+    .evidence-feature div { padding: 26px; }
+    .evidence-feature h3 { margin: 0; font: 800 26px/1.28 var(--font-sans); color: var(--forest); text-wrap: balance; }
+    .evidence-feature p { margin: 14px 0 0; color: var(--muted); font: 500 16px/1.86 var(--font-sans); }
+    .trust-note {
+      margin: 18px 0 0;
+      padding: 14px 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(21,95,63,.16);
+      background: rgba(21,95,63,.06);
+      color: var(--muted);
+      font: 700 15px/1.7 var(--font-sans);
+    }
+    .badge-rack {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+      padding: 18px;
+      align-items: center;
+    }
+    .badge-rack img {
+      width: 100%;
+      aspect-ratio: 1;
+      object-fit: contain;
+      filter: drop-shadow(0 12px 18px rgba(14,33,27,.14));
+      will-change: transform;
+    }
+    .film-rail {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+    .film-window {
+      width: 100%;
+      margin-top: 18px;
+      padding: 2px 0 18px;
+    }
+    .film-window .film-rail { margin-top: 0; }
+    .film-frame {
+      position: relative;
+      min-height: 148px;
+      aspect-ratio: 1.28;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid rgba(21,95,63,.18);
+      background: var(--night);
+      box-shadow: 0 14px 34px rgba(14,33,27,.12);
+    }
+    .film-frame img { width: 100%; height: 100%; object-fit: cover; object-position: center; filter: saturate(.72) contrast(1.14) sepia(.18) brightness(.9); }
+    .film-frame span {
+      position: absolute;
+      left: 8px;
+      bottom: 8px;
+      color: #fff;
+      font: 700 12px/1 var(--font-sans);
+      text-shadow: 0 2px 10px rgba(0,0,0,.5);
+      z-index: 3;
+    }
+
+    .interface-band {
+      background: linear-gradient(135deg, #0b2119, #123b2c 42%, #071611);
+      color: #fff;
+      overflow: hidden;
+    }
+    .interface-band .section-title, .interface-band .section-kicker { color: #fff; }
+    .interface-band .section-lead { color: rgba(255,255,255,.68); }
+    .phone-grid {
+      margin-top: 54px;
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 54px;
+      align-items: center;
+    }
+    .phone {
+      width: 320px;
+      height: 640px;
+      border: 12px solid #0a1511;
+      border-radius: 42px;
+      background: var(--warm);
+      box-shadow: 0 40px 100px rgba(0,0,0,.36);
+      padding: 26px 20px;
+      position: relative;
+      overflow: hidden;
+      justify-self: center;
+    }
+    .phone::before {
+      content: "";
+      position: absolute;
+      top: 12px;
+      left: 50%;
+      width: 92px;
+      height: 10px;
+      transform: translateX(-50%);
+      border-radius: 99px;
+      background: #101b17;
+    }
+    .phone-screen { margin-top: 34px; }
+    .app-card {
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 14px;
+      background: #fff;
+      color: var(--ink);
+      box-shadow: 0 12px 28px rgba(14,33,27,.08);
+      font: 800 15px/1.35 var(--font-sans);
+      display: grid;
+      grid-template-columns: 46px 1fr;
+      gap: 12px;
+      align-items: center;
+    }
+    .app-card.accent { background: var(--forest); color: #fff; }
+    .app-card img {
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      object-fit: cover;
+      box-shadow: 0 8px 18px rgba(14,33,27,.12);
+    }
+    .app-card span { display: block; }
+    .module-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .module {
+      min-height: 260px;
+      padding: 16px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.12);
+    }
+    .module .item-visual { height: 118px; margin-bottom: 18px; }
+    .module h3 { margin: 0 0 10px; color: #fff; font: 800 23px/1.2 var(--font-sans); }
+    .module p { margin: 0; color: rgba(255,255,255,.78); font: 500 17px/1.76 var(--font-sans); }
+
+    .data-grid {
+      margin-top: 54px;
+      display: grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 22px;
+      align-items: stretch;
+    }
+    .map-panel, .species-panel {
+      min-height: 560px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255,250,238,.68);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+    }
+    .map-panel {
+      background:
+        linear-gradient(rgba(11, 32, 27, .92), rgba(11, 32, 27, .92)),
+        url("assets/map-decor.jpg") center/cover;
+    }
+    .map-panel svg { position: absolute; inset: 0; width: 100%; height: 100%; opacity: .72; }
+    .marker {
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 14px rgba(220,164,58,.12);
+    }
+    .marker:nth-of-type(1) { left: 22%; top: 31%; }
+    .marker:nth-of-type(2) { left: 47%; top: 54%; background: var(--leaf); }
+    .marker:nth-of-type(3) { left: 72%; top: 39%; background: var(--blue); }
+    .marker:nth-of-type(4) { left: 34%; top: 73%; }
+    .map-caption {
+      position: absolute;
+      left: 34px;
+      bottom: 34px;
+      color: #fff;
+    }
+    .map-caption h3 { margin: 0; font: 900 38px/1.12 var(--font-sans); }
+    .map-caption p { margin: 12px 0 0; color: rgba(255,255,255,.74); font: 500 15px/1.72 var(--font-sans); }
+
+    .species-panel { padding: 28px; }
+    .species-panel-title { font-size: 42px; }
+    .species-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 14px;
+      margin-top: 24px;
+    }
+    .species-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: 78px 1fr;
+      gap: 12px;
+      align-items: center;
+      padding: 10px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.62);
+      border: 1px solid rgba(21,95,63,.12);
+      overflow: hidden;
+    }
+    .species-card img { width: 78px; height: 68px; border-radius: 8px; object-fit: cover; filter: saturate(.76) contrast(1.13) sepia(.16) brightness(.9); }
+    .species-card > * { position: relative; z-index: 2; }
+    .species-card strong { display: block; color: var(--ink); font: 800 16px/1.24 var(--font-sans); }
+    .species-card span { display: block; margin-top: 6px; color: var(--muted); font: 700 12px/1 var(--font-sans); }
+
+    .security-grid {
+      margin-top: 54px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 18px;
+    }
+    .security-card {
+      min-height: 360px;
+      padding: 20px;
+      border-radius: 8px;
+      background: rgba(255,250,238,.7);
+      border: 1px solid var(--line);
+      box-shadow: 0 18px 58px rgba(14,33,27,.09);
+    }
+    .security-card .item-visual { height: 138px; margin-bottom: 22px; }
+    .security-card svg { width: 42px; height: 42px; color: var(--forest); margin-bottom: 18px; }
+    .security-card h3 { margin: 0 0 12px; font: 800 25px/1.25 var(--font-sans); }
+    .security-card p { margin: 0; color: var(--muted); font: 500 18px/1.84 var(--font-sans); }
+
+    .architecture {
+      padding-bottom: 150px;
+    }
+    .arch-stack {
+      margin-top: 54px;
+      display: grid;
+      gap: 12px;
+    }
+    .arch-row {
+      display: grid;
+      grid-template-columns: 136px 230px 1fr 120px;
+      align-items: center;
+      gap: 20px;
+      min-height: 126px;
+      padding: 20px 24px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+      background: rgba(255,250,238,.68);
+      box-shadow: 0 12px 44px rgba(14,33,27,.07);
+    }
+    .arch-row .item-visual { height: 86px; }
+    .arch-row strong { color: var(--forest); font: 800 24px/1.24 var(--font-sans); }
+    .arch-row span { color: var(--muted); font: 500 18px/1.76 var(--font-sans); overflow-wrap: anywhere; }
+    .arch-row em { font: normal 900 13px/1 var(--font-sans); color: var(--blue); text-align: right; }
+
+    .finale {
+      min-height: 86vh;
+      display: grid;
+      align-items: center;
+      color: #fff;
+      background: linear-gradient(135deg, #071611, #133b2c 54%, #071611);
+      overflow: hidden;
+    }
+    .finale .section-title { color: #fff; max-width: 920px; }
+    .finale .section-lead { color: rgba(255,255,255,.7); }
+    .finale-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 46px;
+    }
+    .finale-card {
+      padding: 18px;
+      min-height: 286px;
+      border-radius: 8px;
+      background: rgba(255,255,255,.08);
+      border: 1px solid rgba(255,255,255,.16);
+    }
+    .finale-card .item-visual { height: 128px; margin-bottom: 20px; }
+    .finale-card strong { display: block; color: var(--moss); font: 800 31px/1.16 var(--font-sans); }
+    .finale-card span { display: block; margin-top: 16px; color: rgba(255,255,255,.8); font: 500 18px/1.84 var(--font-sans); }
+
+    .scanline, .read-progress { will-change: transform; }
+
+    @media (max-width: 920px) {
+      .nav { display: none; }
+      .section-title { font-size: clamp(32px, 4.8vw, 42px); line-height: 1.22; max-width: 760px; }
+      .hero-grid, .phone-grid, .data-grid { grid-template-columns: 1fr; }
+      .field-card { min-height: 500px; }
+      .species-strip { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+      .species-tile { min-height: 210px; aspect-ratio: .88; }
+      .problem-grid, .security-grid, .finale-grid { grid-template-columns: 1fr; }
+      .module-grid { grid-template-columns: 1fr; }
+      .film-rail { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .scene-mosaic { grid-template-columns: 1fr; height: auto; }
+      .scene-card { min-height: 260px; }
+      .scene-card:nth-child(2), .scene-card:nth-child(3) { margin-top: 0; }
+      .journey { min-height: auto; }
+      .journey-pin { position: relative; height: auto; padding: 80px 0; }
+      .journey-track { grid-template-columns: 1fr; width: min(100% - 48px, 560px); padding: 0; }
+      .journey-card { width: 100%; height: auto; min-height: 430px; }
+      .problem-card .item-visual,
+      .journey-card .item-visual,
+      .module .item-visual,
+      .security-card .item-visual,
+      .finale-card .item-visual { height: clamp(190px, 45vw, 260px); }
+      .arch-row { grid-template-columns: 1fr; }
+      .arch-row .item-visual { height: clamp(210px, 45vw, 320px); }
+      .floating-specimen { display: none; }
+      .evidence-board { grid-template-columns: 1fr; }
+      .specimen-stage { min-height: 760px; }
+      .lens-card:nth-child(1) { left: 24px; top: 32px; }
+      .lens-card:nth-child(2) { right: 24px; top: 178px; }
+      .lens-card:nth-child(3) { left: 24px; top: 380px; }
+      .lens-card:nth-child(4) { right: 24px; bottom: 34px; }
+    }
+
+    @media (min-width: 921px) and (max-width: 1180px) {
+      .hero-grid { grid-template-columns: minmax(0, 1fr) 390px; gap: 30px; }
+      .field-card { min-height: 560px; }
+      .journey-track, .problem-grid, .security-grid, .finale-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .module-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .data-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 32px, 1180px); }
+      .site-header { top: 12px; width: calc(100% - 24px); }
+      .brand { font-size: 15px; }
+      .mark { width: 34px; height: 34px; }
+      .hero { padding: 96px 0 48px; }
+      .hero-grid { gap: 26px; }
+      h1 { font-size: clamp(50px, 16vw, 74px); line-height: 1.02; }
+      .title-line { display: block; }
+      .title-line + .title-line { margin-left: 0; }
+      .eyebrow { margin-bottom: 18px; }
+      .hero-sub { margin-top: 18px; font-size: 24px; line-height: 1.38; }
+      .hero-copy { margin-top: 16px; font-size: 18px; line-height: 1.82; }
+      .hero-actions { display: grid; grid-template-columns: 1fr 1fr; margin-top: 24px; }
+      .button { padding: 0 12px; min-height: 46px; font-size: 14px; }
+      .field-card { min-height: 360px; }
+      .hero-stats { grid-template-columns: 1fr; }
+      .species-strip { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 18px; padding: 8px; gap: 8px; }
+      .species-tile { min-height: 156px; aspect-ratio: .9; }
+      section { padding: 84px 0; }
+      .section-title { font-size: 28px; line-height: 1.28; font-weight: 800; }
+      .section-lead { font-size: 18px; line-height: 1.88; }
+      .evidence { padding-top: 72px; }
+      .evidence .section-kicker { margin-bottom: 12px; font-size: 12px; }
+      .evidence .section-title { font-size: 25px; line-height: 1.26; }
+      .evidence .section-lead { margin-top: 16px; font-size: 16px; line-height: 1.72; }
+      .scene-mosaic { margin-top: 34px; }
+      .evidence-feature h3 { font-size: 23px; line-height: 1.34; }
+      .evidence-feature p { font-size: 16px; line-height: 1.9; }
+      .problem-card p, .journey-card p, .module p, .security-card p, .arch-row span, .finale-card span { font-size: 17px; }
+      .problem-card .item-visual,
+      .journey-card .item-visual,
+      .module .item-visual,
+      .security-card .item-visual,
+      .finale-card .item-visual,
+      .arch-row .item-visual { height: clamp(190px, 52vw, 260px); }
+      .species-panel-title { font-size: 32px; }
+      .phone { width: min(320px, 100%); height: 610px; }
+      .map-panel, .species-panel { min-height: 480px; }
+      .species-grid { grid-template-columns: 1fr; }
+      .specimen-stage { min-height: 980px; }
+      .lens-card {
+        position: relative;
+        left: auto !important;
+        right: auto !important;
+        top: auto !important;
+        bottom: auto !important;
+        width: calc(100% - 36px);
+        margin: 18px;
+      }
+      .scanline { display: none; }
+      .badge-rack { grid-template-columns: repeat(3, 1fr); }
+      .film-rail { grid-template-columns: 1fr; gap: 12px; }
+      .film-frame { min-height: 210px; }
+      .scene-card { min-height: 220px; }
+      .scene-card span { left: 16px; right: 16px; bottom: 16px; font-size: 15px; }
+    }
+
+    @media (min-width: 480px) and (max-width: 560px) {
+      .species-strip { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .species-tile { min-height: 168px; aspect-ratio: .88; }
+    }
+
+    @media (pointer: coarse), (max-width: 760px) {
+      .cursor-glow, .cursor-orb, .cursor-ring { display: none; }
+    }
+
+    @media (max-width: 380px) {
+      h1 { font-size: 56px; }
+      .hero-sub { font-size: 23px; }
+      .section-title { font-size: 27px; }
+      .evidence .section-title { font-size: 24px; }
+      .hero-actions { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .button { font-size: 13px; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="read-progress" aria-hidden="true"></div>
+  <div class="cursor-glow" aria-hidden="true"></div>
+  <div class="cursor-orb" aria-hidden="true"></div>
+  <div class="cursor-ring" aria-hidden="true"></div>
+  <header class="site-header">
+    <a href="#top" class="brand" aria-label="外来物种哨兵"><span class="mark">IS</span><span>外来物种哨兵</span></a>
+    <nav class="nav" aria-label="页面导航">
+      <a href="#problem">背景</a>
+      <a href="#journey">闭环</a>
+      <a href="#product">产品</a>
+      <a href="#evidence">影像</a>
+      <a href="#data">数据</a>
+      <a href="#security">安全</a>
+      <a href="#architecture">架构</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="map-lines" aria-hidden="true">
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="none">
+          <path d="M0 640 C230 560 320 720 520 620 S820 520 1020 620 S1320 780 1600 610" fill="none" stroke="rgba(21,95,63,.28)" stroke-width="2"/>
+          <path d="M0 260 C220 180 390 350 620 240 S920 170 1110 280 S1370 420 1600 260" fill="none" stroke="rgba(10,74,148,.18)" stroke-width="2"/>
+          <path d="M0 780 C210 690 390 850 620 720 S1000 620 1210 750 S1440 880 1600 720" fill="none" stroke="rgba(220,164,58,.20)" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="shell hero-grid">
+        <div class="hero-copy-block">
+          <div class="eyebrow reveal">公众参与式生态线索系统</div>
+          <h1 class="hero-title" aria-label="外来物种哨兵"><span class="title-line" aria-hidden="true">外来物种</span><span class="title-line" aria-hidden="true">哨兵</span></h1>
+          <p class="hero-sub reveal">把一次野外发现，变成<span class="nowrap">可审核、</span><span class="nowrap">可追踪、</span><span class="nowrap">可公开</span>的数据闭环。</p>
+          <p class="hero-copy reveal">拍照上传后返回候选物种，用户 GPS 打点并提交线索，审核员确认后进入公开地图。积分、徽章、排行榜与商城让持续参与自然发生。</p>
+          <div class="hero-actions reveal">
+            <a class="button" href="#journey">查看业务闭环</a>
+            <a class="button secondary" href="#architecture">工程架构</a>
+          </div>
+        </div>
+        <aside class="field-card hero-visual" aria-label="生态上报视觉">
+          <img src="assets/sentinel-hero.webp" alt="城市湿地外来物种线索与地图打点主视觉" />
+          <div class="scan-ring"></div>
+          <div class="floating-specimen one" data-label="红火蚁"><img src="assets/species-013.jpg" alt="红火蚁"></div>
+          <div class="floating-specimen two" data-label="薇甘菊"><img src="assets/species-011.jpg" alt="薇甘菊"></div>
+          <div class="floating-specimen three" data-label="水葫芦"><img src="assets/species-004.jpg" alt="水葫芦"></div>
+          <div class="hero-stats">
+            <div class="hero-stat"><strong>20</strong><span>物种知识库</span></div>
+            <div class="hero-stat"><strong>12+</strong><span>小程序页面</span></div>
+            <div class="hero-stat"><strong>73</strong><span>测试用例</span></div>
+          </div>
+        </aside>
+      </div>
+      <div class="shell species-strip" aria-label="项目物种素材">
+        <div class="species-tile"><img src="assets/species-001.jpg" alt="加拿大一枝黄花"><span>加拿大一枝黄花</span></div>
+        <div class="species-tile"><img src="assets/species-002.jpg" alt="福寿螺"><span>福寿螺</span></div>
+        <div class="species-tile"><img src="assets/species-003.jpg" alt="红耳龟"><span>红耳龟</span></div>
+        <div class="species-tile"><img src="assets/species-004.jpg" alt="水葫芦"><span>水葫芦</span></div>
+        <div class="species-tile"><img src="assets/species-005.jpg" alt="空心莲子草"><span>空心莲子草</span></div>
+        <div class="species-tile"><img src="assets/species-007.jpg" alt="克氏原螯虾"><span>克氏原螯虾</span></div>
+        <div class="species-tile"><img src="assets/species-016.jpg" alt="非洲大蜗牛"><span>非洲大蜗牛</span></div>
+      </div>
+    </section>
+
+    <section id="problem">
+      <div class="shell">
+        <div class="section-kicker reveal">PROJECT CONTEXT</div>
+        <h2 class="section-title reveal">治理难点不是“有没有发现”，而是发现能否成为可信数据。</h2>
+        <p class="section-lead reveal">外来入侵物种常在校园、公园、河道、农田边缘被偶然发现。系统的价值，是把这些零散线索结构化，并给审核、展示和运营留下清晰入口。</p>
+        <div class="problem-grid">
+          <article class="problem-card">
+            <div class="item-visual"><img src="assets/sentinel-field-report.webp" alt="城市湿地线索上报场景"></div>
+            <b>01</b><h3>线索分散</h3><p>普通用户会看到疑似外来物种，但缺少统一入口、规范字段和后续追踪。</p>
+          </article>
+          <article class="problem-card">
+            <div class="item-visual"><img src="assets/sentinel-ai-recognition.webp" alt="物种候选识别标本观察图"></div>
+            <b>02</b><h3>识别门槛</h3><p>候选物种、风险等级、历史记录、分布趋势，需要被组织成可理解的参考。</p>
+          </article>
+          <article class="problem-card">
+            <div class="item-visual"><img src="assets/sentinel-review-safety.webp" alt="人工复核可信边界示意图"></div>
+            <b>03</b><h3>可信边界</h3><p>未经审核的记录不适合公开展示，需要 reviewer/admin 做最终确认。</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section id="journey" class="journey">
+      <div class="journey-pin">
+        <div class="shell">
+          <div class="section-kicker reveal">CLOSED LOOP</div>
+          <h2 class="section-title reveal">从发现到公开，一条完整的生态线索链路。</h2>
+        </div>
+        <div class="journey-track">
+          <article class="journey-card"><div><div class="item-visual"><img src="assets/sentinel-field-report.webp" alt="野外拍照上传示意图"></div><span class="num">01</span><h3>拍照上传</h3><p>用户在野外发现陌生植物或动物，上传图片并进入候选识别流程。</p></div><div class="line"></div></article>
+          <article class="journey-card"><div><div class="item-visual"><img src="assets/sentinel-ai-recognition.webp" alt="候选识别链路示意图"></div><span class="num">02</span><h3>候选识别</h3><p>识别链给出候选物种，降低普通用户的判断门槛。</p></div><div class="line"></div></article>
+          <article class="journey-card"><div><div class="item-visual"><img src="assets/sentinel-map-trust.webp" alt="GPS 地图打点示意图"></div><span class="num">03</span><h3>GPS 打点</h3><p>记录经纬度、地址、备注，形成可复核的空间线索。</p></div><div class="line"></div></article>
+          <article class="journey-card"><div><div class="item-visual"><img src="assets/sentinel-review-safety.webp" alt="人工复核工作台示意图"></div><span class="num">04</span><h3>人工复核</h3><p>审核员确认最终物种、写入审核备注，控制公开边界。</p></div><div class="line"></div></article>
+          <article class="journey-card"><div><div class="item-visual"><img src="assets/sentinel-results.webp" alt="公开地图成果示意图"></div><span class="num">05</span><h3>地图公开</h3><p>审核通过的记录进入公开地图与物种详情页，沉淀可信分布。</p></div><div class="line"></div></article>
+          <article class="journey-card"><div><div class="item-visual"><img src="assets/sentinel-incentive.webp" alt="积分徽章运营示意图"></div><span class="num">06</span><h3>积分运营</h3><p>积分、徽章、排行榜和商城，把持续参与变成可感知反馈。</p></div><div class="line"></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="product" class="interface-band">
+      <div class="shell">
+        <div class="section-kicker reveal">PRODUCT SYSTEM</div>
+        <h2 class="section-title reveal">功能不是页面堆叠，而是围绕生态线索闭环展开。</h2>
+        <p class="section-lead reveal">小程序包含首页、地图、上报、物种详情、审核台、个人中心、排行榜、商城、通知等 12+ 页面，前台采集和后台复核同时成立。</p>
+        <div class="phone-grid">
+          <div class="phone reveal">
+            <div class="phone-screen">
+              <div class="app-card accent"><img src="assets/sentinel-map-trust.webp" alt=""><span>今日线索 03</span></div>
+              <div class="app-card"><img src="assets/sentinel-field-report.webp" alt=""><span>拍照上报</span></div>
+              <div class="app-card"><img src="assets/sentinel-map-trust.webp" alt=""><span>附近记录</span></div>
+              <div class="app-card"><img src="assets/species-001.jpg" alt=""><span>物种库</span></div>
+              <div class="app-card"><img src="assets/sentinel-review-safety.webp" alt=""><span>审核状态</span></div>
+              <div class="app-card"><img src="assets/badge-ecoguard.png" alt=""><span>积分徽章</span></div>
+            </div>
+          </div>
+          <div class="module-grid">
+            <article class="module"><div class="item-visual"><img src="assets/sentinel-product-system.webp" alt="采集产品界面示意图"></div><h3>采集</h3><p>首页、地图、上报、物种详情，解决“看见 - 记录 - 理解”。</p></article>
+            <article class="module"><div class="item-visual"><img src="assets/sentinel-review-safety.webp" alt="审核工作台示意图"></div><h3>审核</h3><p>审核台、我的上报、已核实记录，解决“状态 - 复核 - 公开”。</p></article>
+            <article class="module"><div class="item-visual"><img src="assets/sentinel-incentive.webp" alt="运营激励艺术效果图"></div><h3>运营</h3><p>排行榜、积分商城、个人中心、通知，解决“持续参与”。</p></article>
+            <article class="module"><div class="item-visual"><img src="assets/species-010.jpg" alt="物种库真实物种图"></div><h3>物种库</h3><p>20 个物种含图片、风险等级、来源地、危害和防治建议。</p></article>
+            <article class="module"><div class="item-visual"><img src="assets/sentinel-architecture.webp" alt="生态关系知识图谱示意图"></div><h3>知识图谱</h3><p>天敌、共生、扩散路径等关系字段，帮助理解生态关联。</p></article>
+            <article class="module"><div class="item-visual"><img src="assets/sentinel-results.webp" alt="数据导出成果图"></div><h3>数据导出</h3><p>expert 用户可导出已核实 CSV，用于课程实践或后续分析。</p></article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="evidence" class="evidence">
+      <div class="shell">
+        <div class="section-kicker reveal">VISUAL EVIDENCE</div>
+        <h2 class="section-title reveal">视觉证据层：场景、物种与复核状态。</h2>
+        <p class="section-lead reveal">展示页不再只靠文字说明，而是把现场上报、候选识别、积分徽章和监测影像组织成一套视觉证据层。滚动时画面轻微视差，鼠标经过时卡片像标本台一样浮起。</p>
+        <div class="scene-mosaic" aria-label="项目场景影像">
+          <figure class="scene-card reveal">
+            <img src="assets/sentinel-field-report.webp" alt="生态治理场景">
+            <span>从城市边缘到河道湿地，线索入口保持一致。</span>
+          </figure>
+          <figure class="scene-card reveal">
+            <img src="assets/sentinel-ai-recognition.webp" alt="识别链路场景">
+            <span>候选识别降低判断门槛，复核保留可信边界。</span>
+          </figure>
+          <figure class="scene-card reveal">
+            <img src="assets/sentinel-results.webp" alt="项目成果场景">
+            <span>审核通过后进入地图、物种档案与数据导出。</span>
+          </figure>
+        </div>
+        <div class="evidence-board">
+          <div class="specimen-stage reveal" aria-label="物种监测标本台">
+            <article class="lens-card">
+              <img src="assets/species-010.jpg" alt="豚草">
+              <strong>豚草</strong>
+              <span>花粉致敏 · 城市边缘扩散 · 高风险监测</span>
+            </article>
+            <article class="lens-card">
+              <img src="assets/species-013.jpg" alt="红火蚁">
+              <strong>红火蚁</strong>
+              <span>人身伤害风险 · 群落扩张快 · 需快速复核</span>
+            </article>
+            <article class="lens-card">
+              <img src="assets/species-011.jpg" alt="薇甘菊">
+              <strong>薇甘菊</strong>
+              <span>攀援覆盖 · 压制本地植物 · 重点巡查</span>
+            </article>
+            <article class="lens-card">
+              <img src="assets/species-008.jpg" alt="牛蛙">
+              <strong>牛蛙</strong>
+              <span>水域生态影响 · 影像线索 + 位置确认</span>
+            </article>
+            <div class="scanline"></div>
+          </div>
+          <aside class="evidence-side">
+            <div class="evidence-feature reveal">
+              <img src="assets/sentinel-ai-recognition.webp" alt="识别链路视觉">
+              <div>
+                <h3>模型候选只是起点</h3>
+                <p>最终公开依赖人工复核，所以页面视觉更强调“观察、线索、确认”，而不是把识别结果包装成绝对结论。</p>
+                <p class="trust-note">识别结果仅作为线索参考；公开地图以人工复核后的记录为准。</p>
+              </div>
+            </div>
+            <div class="badge-rack reveal" aria-label="徽章体系">
+              <img src="assets/badge-newbie.png" alt="newbie 徽章">
+              <img src="assets/badge-ecoguard.png" alt="eco guard 徽章">
+              <img src="assets/badge-contributor.png" alt="contributor 徽章">
+              <img src="assets/badge-expert.png" alt="expert 徽章">
+              <img src="assets/badge-species.png" alt="species 徽章">
+            </div>
+          </aside>
+        </div>
+        <div class="film-window">
+          <div class="film-rail" aria-label="更多物种影像">
+            <div class="film-frame"><img src="assets/species-006.jpg" alt="互花米草"><span>互花米草</span></div>
+            <div class="film-frame"><img src="assets/species-007.jpg" alt="克氏原螯虾"><span>克氏原螯虾</span></div>
+            <div class="film-frame"><img src="assets/species-009.jpg" alt="清道夫"><span>清道夫</span></div>
+            <div class="film-frame"><img src="assets/species-012.jpg" alt="巴西龟"><span>巴西龟</span></div>
+            <div class="film-frame"><img src="assets/species-014.jpg" alt="小龙虾"><span>小龙虾</span></div>
+            <div class="film-frame"><img src="assets/species-015.jpg" alt="凤眼莲"><span>凤眼莲</span></div>
+            <div class="film-frame"><img src="assets/species-017.jpg" alt="刺萼龙葵"><span>刺萼龙葵</span></div>
+            <div class="film-frame"><img src="assets/species-018.jpg" alt="飞机草"><span>飞机草</span></div>
+            <div class="film-frame"><img src="assets/species-019.jpg" alt="大米草"><span>大米草</span></div>
+            <div class="film-frame"><img src="assets/species-020.jpg" alt="毒麦"><span>毒麦</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="data">
+      <div class="shell">
+        <div class="section-kicker reveal">TRUSTED DATA</div>
+        <h2 class="section-title reveal">审核后的记录，才进入公开地图和物种档案。</h2>
+        <p class="section-lead reveal">系统把“谁发现、在哪里、疑似什么、最终确认什么”连接起来，形成可浏览、可导出、可继续分析的生态数据资产。</p>
+        <div class="data-grid">
+          <div class="map-panel reveal">
+            <svg viewBox="0 0 760 560" preserveAspectRatio="none" aria-hidden="true">
+              <path d="M20 420 C120 300 190 380 260 260 S430 180 520 270 S640 370 740 230" fill="none" stroke="rgba(117,219,200,.55)" stroke-width="2"/>
+              <path d="M40 220 C180 160 210 280 330 210 S520 80 700 170" fill="none" stroke="rgba(117,219,200,.34)" stroke-width="2"/>
+              <path d="M80 500 C220 440 310 520 460 430 S620 330 750 390" fill="none" stroke="rgba(220,164,58,.34)" stroke-width="2"/>
+            </svg>
+            <span class="marker"></span><span class="marker"></span><span class="marker"></span><span class="marker"></span>
+            <div class="map-caption"><h3>Approved Map</h3><p>公开展示只接收审核通过记录。</p></div>
+          </div>
+          <div class="species-panel reveal">
+            <div class="section-kicker">SPECIES LIBRARY</div>
+            <h3 class="section-title species-panel-title">20 个物种档案</h3>
+            <div class="species-grid">
+              <div class="species-card"><img src="assets/species-001.jpg" alt=""><div><strong>加拿大一枝黄花</strong><span>植物 / 高风险</span></div></div>
+              <div class="species-card"><img src="assets/species-002.jpg" alt=""><div><strong>福寿螺</strong><span>动物 / 高风险</span></div></div>
+              <div class="species-card"><img src="assets/species-003.jpg" alt=""><div><strong>红耳龟</strong><span>动物 / 中风险</span></div></div>
+              <div class="species-card"><img src="assets/species-004.jpg" alt=""><div><strong>水葫芦</strong><span>植物 / 高风险</span></div></div>
+              <div class="species-card"><img src="assets/species-005.jpg" alt=""><div><strong>空心莲子草</strong><span>植物 / 高风险</span></div></div>
+              <div class="species-card"><img src="assets/species-016.jpg" alt=""><div><strong>非洲大蜗牛</strong><span>动物 / 高风险</span></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="security">
+      <div class="shell">
+        <div class="section-kicker reveal">DEFENSE LAYERS</div>
+        <h2 class="section-title reveal">公众上报必须防重复、防刷分、防越权。</h2>
+        <p class="section-lead reveal">系统用图片去重、地理时空去重、积分门槛和 JWT 权限保护，保证“可参与”不牺牲“可信”。</p>
+        <div class="security-grid">
+          <article class="security-card"><div class="item-visual"><img src="assets/sentinel-review-safety.webp" alt="图片去重安全示意图"></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16M7 4h10M6 10l1 10h10l1-10"/><path d="M10 14h4"/></svg><h3>图片 MD5 去重</h3><p>同一图片 7 天内不可重复上报，作为基础防线挡住最直接的重复提交。</p></article>
+          <article class="security-card"><div class="item-visual"><img src="assets/sentinel-map-trust.webp" alt="地理时空去重地图示意图"></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="10" r="3"/><path d="M12 21s7-5.2 7-11a7 7 0 0 0-14 0c0 5.8 7 11 7 11z"/></svg><h3>地理时空去重</h3><p>200m 半径 + 12 小时内同区域去重，降低刷分和密集重复记录。</p></article>
+          <article class="security-card"><div class="item-visual"><img src="assets/sentinel-architecture.webp" alt="权限与积分门槛架构图"></div><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3l8 4v6c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V7l8-4z"/><path d="M9 12l2 2 4-5"/></svg><h3>权限与积分门槛</h3><p>JWT 保护私有接口；跨用户订单、通知、积分访问返回 403；积分过低禁止提交。</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="architecture" class="architecture">
+      <div class="shell">
+        <div class="section-kicker reveal">ENGINEERING</div>
+        <h2 class="section-title reveal">轻量技术栈，覆盖完整业务边界。</h2>
+        <p class="section-lead reveal">原生微信小程序 + Node.js/Express + SQLite，配合上传校验、识别任务、审核状态、积分结算和测试覆盖，构成一个闭环项目。</p>
+        <div class="arch-stack">
+          <div class="arch-row"><div class="item-visual"><img src="assets/sentinel-product-system.webp" alt="微信小程序界面艺术图"></div><strong>微信小程序</strong><span>home / map / report / detail / review / profile / shop / notifications</span><em>12+ pages</em></div>
+          <div class="arch-row"><div class="item-visual"><img src="assets/sentinel-architecture.webp" alt="Express API 架构示意图"></div><strong>Express API</strong><span>auth / species / reports / uploads / leaderboard / orders / notifications</span><em>REST</em></div>
+          <div class="arch-row"><div class="item-visual"><img src="assets/sentinel-ai-recognition.webp" alt="识别链路艺术图"></div><strong>识别链路</strong><span>智谱 GLM-4V → Kimi → Ollama → Python 微服务 → Mock 兜底</span><em>fallback</em></div>
+          <div class="arch-row"><div class="item-visual"><img src="assets/sentinel-results.webp" alt="SQLite 数据资产示意图"></div><strong>SQLite 数据层</strong><span>users / reports / species / orders / user_credit / achievements</span><em>local db</em></div>
+          <div class="arch-row"><div class="item-visual"><img src="assets/sentinel-review-safety.webp" alt="测试覆盖安全图"></div><strong>测试覆盖</strong><span>反垃圾机制、集成流程、安全权限、静态资产完整性</span><em>73 cases</em></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="finale">
+      <div class="orbit-layer" aria-hidden="true">
+        <svg viewBox="0 0 1600 900" preserveAspectRatio="none">
+          <circle cx="1280" cy="260" r="220" fill="none" stroke="rgba(169,192,110,.18)" stroke-width="2"/>
+          <circle cx="1280" cy="260" r="320" fill="none" stroke="rgba(255,255,255,.10)" stroke-width="1"/>
+          <path d="M0 720 C220 620 360 800 580 690 S900 550 1100 690 S1360 830 1600 650" fill="none" stroke="rgba(220,164,58,.22)" stroke-width="2"/>
+        </svg>
+      </div>
+      <div class="shell">
+        <div class="section-kicker reveal">RESULT</div>
+        <h2 class="section-title reveal">识别不是终点，可信闭环才是核心。</h2>
+        <p class="section-lead reveal">这个项目最有价值的部分，是把拍照识别、GPS 上报、人工审核、公开展示、积分运营和安全边界放进同一个系统表达里。</p>
+        <div class="finale-grid">
+          <div class="finale-card"><div class="item-visual"><img src="assets/sentinel-results.webp" alt="闭环链路艺术效果图"></div><strong>闭环</strong><span>从发现到公开地图，业务链路完整。</span></div>
+          <div class="finale-card"><div class="item-visual"><img src="assets/sentinel-review-safety.webp" alt="可信审核安全效果图"></div><strong>可信</strong><span>审核机制、反作弊与权限测试覆盖关键路径。</span></div>
+          <div class="finale-card"><div class="item-visual"><img src="assets/sentinel-incentive.webp" alt="积分运营艺术效果图"></div><strong>可运营</strong><span>积分、徽章、排行榜和商城让参与持续发生。</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    const splitTitle = document.querySelector(".hero-title");
+    splitTitle.querySelectorAll(".title-line").forEach(line => {
+      line.innerHTML = line.textContent.split("").map(char => `<span class="split-word">${char}</span>`).join("");
+    });
+
+    const revealTargets = ".reveal, .problem-card, .journey-card, .module, .security-card, .arch-row, .species-card, .finale-card, .species-tile, .lens-card, .film-frame, .floating-specimen, .scene-card, .split-word";
+    const showAll = () => {
+      gsap.set(revealTargets, { autoAlpha: 1, x: 0, y: 0, rotation: 0, rotationX: 0, rotationY: 0, scale: 1, clearProps: "transform" });
+    };
+
+    const mm = gsap.matchMedia();
+
+    mm.add("(prefers-reduced-motion: reduce)", () => {
+      showAll();
+      gsap.set(".cursor-glow, .cursor-orb, .cursor-ring", { autoAlpha: 0 });
+      return () => {};
+    });
+
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      gsap.to(".read-progress", {
+        scaleX: 1,
+        ease: "none",
+        scrollTrigger: { trigger: document.body, start: "top top", end: "bottom bottom", scrub: .35 }
+      });
+
+      gsap.set([".reveal", ".problem-card", ".module", ".security-card", ".arch-row", ".species-card", ".finale-card", ".lens-card", ".film-frame", ".scene-card"], { autoAlpha: 0, y: 30 });
+      gsap.set(".split-word", { autoAlpha: 0, yPercent: 105, rotate: 5 });
+      gsap.set(".species-tile", { autoAlpha: 0, y: 42 });
+      gsap.set(".floating-specimen", { autoAlpha: 0, y: 24, rotate: -4 });
+      gsap.set(".journey-card", { autoAlpha: 0, y: 30 });
+
+      const heroTl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      heroTl
+        .to(".split-word", { autoAlpha: 1, yPercent: 0, rotate: 0, duration: .82, stagger: .045 })
+        .to(".hero .reveal", { autoAlpha: 1, y: 0, duration: .72, stagger: .08 }, "-=.45")
+        .from(".hero-visual", { autoAlpha: 0, y: 36, scale: .985, duration: .95 }, "-=.62")
+        .to(".floating-specimen", { autoAlpha: 1, y: 0, rotate: 0, duration: .65, stagger: .1 }, "-=.42")
+        .to(".species-tile", { autoAlpha: 1, y: 0, duration: .58, stagger: .045 }, "-=.32");
+
+      document.querySelectorAll("section").forEach(section => {
+        const items = section.querySelectorAll(".reveal");
+        if (!items.length) return;
+        gsap.to(items, {
+          autoAlpha: 1,
+          y: 0,
+          duration: .72,
+          stagger: .08,
+          ease: "power3.out",
+          scrollTrigger: { trigger: section, start: "top 74%" }
+        });
+      });
+
+      const revealGroups = [
+        [".problem-card", ".problem-grid", .1],
+        [".journey-card", ".journey-track", .07],
+        [".module", ".module-grid", .055],
+        [".species-card", ".species-panel", .045],
+        [".scene-card", ".scene-mosaic", .09],
+        [".lens-card", ".evidence-board", .08],
+        [".film-frame", ".film-rail", .035],
+        [".security-card", ".security-grid", .08],
+        [".arch-row", ".arch-stack", .06],
+        [".finale-card", ".finale-grid", .06]
+      ];
+
+      revealGroups.forEach(([selector, trigger, stagger]) => {
+        gsap.to(selector, {
+          autoAlpha: 1,
+          y: 0,
+          duration: .68,
+          stagger,
+          ease: "power3.out",
+          scrollTrigger: { trigger, start: "top 80%" }
+        });
+      });
+
+      gsap.to(".scene-card img", {
+        scale: 1.08,
+        ease: "none",
+        scrollTrigger: { trigger: ".scene-mosaic", start: "top bottom", end: "bottom top", scrub: 1 }
+      });
+      gsap.to(".evidence-feature img", {
+        scale: 1.05,
+        ease: "none",
+        scrollTrigger: { trigger: ".evidence-feature", start: "top bottom", end: "bottom top", scrub: 1 }
+      });
+      gsap.to(".specimen-stage", {
+        y: -18,
+        ease: "none",
+        scrollTrigger: { trigger: ".evidence", start: "top bottom", end: "bottom top", scrub: 1 }
+      });
+
+      const viewportLoops = [
+        gsap.to(".scan-ring", { rotate: 360, duration: 18, ease: "none", repeat: -1, paused: true }),
+        gsap.to(".field-card > img", { scale: 1.05, duration: 8, yoyo: true, repeat: -1, ease: "sine.inOut", paused: true }),
+        gsap.to(".map-lines svg", { xPercent: -3, duration: 10, yoyo: true, repeat: -1, ease: "sine.inOut", paused: true }),
+        gsap.to(".scanline", { y: 430, duration: 2.8, repeat: -1, ease: "sine.inOut", yoyo: true, paused: true })
+      ];
+      ScrollTrigger.create({
+        trigger: ".hero",
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => viewportLoops.slice(0, 3).forEach(tween => tween.play()),
+        onEnterBack: () => viewportLoops.slice(0, 3).forEach(tween => tween.play()),
+        onLeave: () => viewportLoops.slice(0, 3).forEach(tween => tween.pause()),
+        onLeaveBack: () => viewportLoops.slice(0, 3).forEach(tween => tween.pause())
+      });
+      ScrollTrigger.create({
+        trigger: ".specimen-stage",
+        start: "top bottom",
+        end: "bottom top",
+        onEnter: () => viewportLoops[3].play(),
+        onEnterBack: () => viewportLoops[3].play(),
+        onLeave: () => viewportLoops[3].pause(),
+        onLeaveBack: () => viewportLoops[3].pause()
+      });
+
+      gsap.utils.toArray(".marker").forEach((marker, i) => {
+        const tween = gsap.to(marker, { scale: 1.38, duration: 1.2 + i * .2, yoyo: true, repeat: -1, ease: "sine.inOut", paused: true });
+        ScrollTrigger.create({
+          trigger: ".map-panel",
+          start: "top bottom",
+          end: "bottom top",
+          onEnter: () => tween.play(),
+          onEnterBack: () => tween.play(),
+          onLeave: () => tween.pause(),
+          onLeaveBack: () => tween.pause()
+        });
+      });
+
+      window.addEventListener("load", () => ScrollTrigger.refresh(), { once: true });
+      return () => {
+        viewportLoops.forEach(tween => tween.kill());
+      };
+    });
+
+    mm.add("(prefers-reduced-motion: no-preference) and (pointer: fine) and (min-width: 761px)", () => {
+      const cursorGlow = document.querySelector(".cursor-glow");
+      const cursorOrb = document.querySelector(".cursor-orb");
+      const cursorRing = document.querySelector(".cursor-ring");
+      const cursorTargets = "a, button, .button, .hero-stat, .app-card, .problem-card, .journey-card, .module, .security-card, .arch-row, .finale-card, .scene-card, .lens-card, .species-tile, .species-card, .film-frame";
+      let cursorVisible = false;
+
+      gsap.set([cursorGlow, cursorOrb, cursorRing], { xPercent: -50, yPercent: -50, autoAlpha: 0 });
+      const glowX = gsap.quickTo(cursorGlow, "x", { duration: .5, ease: "power3" });
+      const glowY = gsap.quickTo(cursorGlow, "y", { duration: .5, ease: "power3" });
+      const orbX = gsap.quickTo(cursorOrb, "x", { duration: .16, ease: "power3" });
+      const orbY = gsap.quickTo(cursorOrb, "y", { duration: .16, ease: "power3" });
+      const ringX = gsap.quickTo(cursorRing, "x", { duration: .38, ease: "power3" });
+      const ringY = gsap.quickTo(cursorRing, "y", { duration: .38, ease: "power3" });
+
+      const showCursor = (event) => {
+        glowX(event.clientX);
+        glowY(event.clientY);
+        orbX(event.clientX);
+        orbY(event.clientY);
+        ringX(event.clientX);
+        ringY(event.clientY);
+        if (!cursorVisible) {
+          cursorVisible = true;
+          gsap.to(cursorGlow, { autoAlpha: .38, duration: .22, overwrite: "auto" });
+          gsap.to(cursorOrb, { autoAlpha: .9, duration: .18, overwrite: "auto" });
+          gsap.to(cursorRing, { autoAlpha: .74, duration: .2, overwrite: "auto" });
+        }
+      };
+
+      const onPointerMove = (event) => showCursor(event);
+      window.addEventListener("pointermove", onPointerMove, { passive: true });
+
+      const resetCursor = () => {
+        gsap.to(cursorRing, { scale: 1, borderColor: "rgba(21,95,63,.38)", backgroundColor: "rgba(255,249,236,.16)", duration: .22, overwrite: "auto" });
+        gsap.to(cursorOrb, { scale: 1, backgroundColor: "#dca43a", duration: .22, overwrite: "auto" });
+      };
+      const enlargeCursor = (event) => {
+        showCursor(event);
+        gsap.to(cursorRing, { scale: 1.55, borderColor: "rgba(220,164,58,.62)", backgroundColor: "rgba(220,164,58,.12)", duration: .22, overwrite: "auto" });
+        gsap.to(cursorOrb, { scale: .68, backgroundColor: "#155f3f", duration: .22, overwrite: "auto" });
+      };
+
+      const targetEls = gsap.utils.toArray(cursorTargets);
+      targetEls.forEach(target => {
+        target.addEventListener("pointerenter", enlargeCursor);
+        target.addEventListener("pointerleave", resetCursor);
+      });
+
+      const tiltEls = gsap.utils.toArray(".field-card, .specimen-stage, .lens-card, .species-tile, .problem-card, .journey-card, .module, .security-card, .arch-row, .finale-card, .scene-card, .species-card, .film-frame, .app-card");
+      const tiltCleanups = tiltEls.map(card => {
+        const rotateX = gsap.quickTo(card, "rotationX", { duration: .32, ease: "power3" });
+        const rotateY = gsap.quickTo(card, "rotationY", { duration: .32, ease: "power3" });
+        const y = gsap.quickTo(card, "y", { duration: .32, ease: "power3" });
+        const onMove = (event) => {
+          const rect = card.getBoundingClientRect();
+          const px = (event.clientX - rect.left) / rect.width - .5;
+          const py = (event.clientY - rect.top) / rect.height - .5;
+          rotateY(px * 5);
+          rotateX(py * -4);
+          y(-3);
+        };
+        const onLeave = () => {
+          rotateX(0);
+          rotateY(0);
+          y(0);
+        };
+        card.addEventListener("pointermove", onMove, { passive: true });
+        card.addEventListener("pointerleave", onLeave);
+        return () => {
+          card.removeEventListener("pointermove", onMove);
+          card.removeEventListener("pointerleave", onLeave);
+        };
+      });
+
+      const hideCursor = () => {
+        cursorVisible = false;
+        gsap.to([cursorGlow, cursorOrb, cursorRing], { autoAlpha: 0, duration: .18, overwrite: true });
+        resetCursor();
+      };
+      document.documentElement.addEventListener("pointerleave", hideCursor);
+
+      return () => {
+        window.removeEventListener("pointermove", onPointerMove);
+        document.documentElement.removeEventListener("pointerleave", hideCursor);
+        targetEls.forEach(target => {
+          target.removeEventListener("pointerenter", enlargeCursor);
+          target.removeEventListener("pointerleave", resetCursor);
+        });
+        tiltCleanups.forEach(cleanup => cleanup());
+      };
+    });
+  </script>
+</body>
+</html>
+

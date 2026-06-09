@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>技能质量看板 — Skill Quality Dashboard</title>
+<style>
+  :root {
+    --font-sans: -apple-system, "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif;
+    --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+    --radius-max: 8px;
+    --color-bg: #f3f4f6;
+    --color-surface: #ffffff;
+    --color-border: #d1d5db;
+    --color-border-light: #e5e7eb;
+    --color-text: #111827;
+    --color-text-secondary: #6b7280;
+    --color-accent: #2563eb;
+    --color-accent-hover: #1d4ed8;
+    --color-success: #16a34a;
+    --color-success-bg: #dcfce7;
+    --color-warning: #d97706;
+    --color-warning-bg: #fef3c7;
+    --color-danger: #dc2626;
+    --color-danger-bg: #fee2e2;
+    --color-info: #0891b2;
+    --color-info-bg: #cffafe;
+    --color-grade-a: #16a34a;
+    --color-grade-b: #2563eb;
+    --color-grade-c: #d97706;
+    --color-grade-d: #dc2626;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--font-sans);
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--color-text);
+    background: var(--color-bg);
+    padding: 16px;
+  }
+
+  @media (min-width: 1024px) {
+    body { padding: 24px 32px; }
+  }
+
+  h1 { font-size: 1.5rem; font-weight: 700; line-height: 1.3; }
+  h2 { font-size: 1.25rem; font-weight: 600; line-height: 1.4; }
+  h3 { font-size: 1.1rem; font-weight: 600; line-height: 1.4; }
+
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+  .header .subtitle { font-size: 0.8125rem; color: var(--color-text-secondary); }
+
+  /* ── Summary cards ── */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .summary-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .summary-card .label {
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .summary-card .value {
+    font-family: var(--font-mono);
+    font-size: 1.75rem;
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .grade-bar {
+    display: flex;
+    height: 8px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    margin-top: 8px;
+    gap: 2px;
+  }
+  .grade-bar span {
+    flex: 1;
+    border-radius: var(--radius-sm);
+    transition: flex 0.3s ease;
+  }
+  .grade-bar .g-a { background: var(--color-grade-a); }
+  .grade-bar .g-b { background: var(--color-grade-b); }
+  .grade-bar .g-c { background: var(--color-grade-c); }
+  .grade-bar .g-d { background: var(--color-grade-d); }
+
+  .grade-legend {
+    display: flex;
+    gap: 12px;
+    margin-top: 6px;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+  }
+  .grade-legend i {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-sm);
+    margin-right: 4px;
+    vertical-align: middle;
+  }
+
+  /* ── Filter bar ── */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .filter-bar label {
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+  }
+  .filter-bar select, .filter-bar input {
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    color: var(--color-text);
+    min-height: 32px;
+  }
+  .filter-bar input { width: 200px; }
+
+  .badge {
+    display: inline-block;
+    font-size: 0.6875rem;
+    font-family: var(--font-mono);
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-md);
+    line-height: 1.5;
+  }
+  .badge-pass { background: var(--color-success-bg); color: var(--color-success); }
+  .badge-fail { background: var(--color-danger-bg); color: var(--color-danger); }
+  .badge-warn { background: var(--color-warning-bg); color: var(--color-warning); }
+  .badge-info { background: var(--color-info-bg); color: var(--color-info); }
+
+  .score-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 1rem;
+    min-width: 44px;
+    text-align: center;
+    padding: 4px 10px;
+    border-radius: var(--radius-md);
+    line-height: 1.3;
+  }
+  .score-a { background: var(--color-success-bg); color: var(--color-grade-a); }
+  .score-b { background: #dbeafe; color: var(--color-grade-b); }
+  .score-c { background: var(--color-warning-bg); color: var(--color-grade-c); }
+  .score-d { background: var(--color-danger-bg); color: var(--color-grade-d); }
+
+  /* ── Skill list ── */
+  .skill-list {
+    display: grid;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+
+  .skill-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-light);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: box-shadow 0.15s ease;
+  }
+  .skill-card:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+  .skill-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .skill-header:hover { background: #f9fafb; }
+  .skill-header .name { font-weight: 600; flex: 1; min-width: 0; }
+  .skill-header .path {
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    font-family: var(--font-mono);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+  }
+  .skill-header .chevron {
+    font-size: 0.875rem;
+    color: var(--color-text-secondary);
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+  }
+  .skill-card.open .skill-header .chevron { transform: rotate(90deg); }
+
+  .skill-body {
+    display: none;
+    padding: 0 16px 16px;
+    border-top: 1px solid var(--color-border-light);
+  }
+  .skill-card.open .skill-body { display: block; }
+
+  /* ── Checks table ── */
+  .checks-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.875rem;
+    margin-top: 12px;
+  }
+  .checks-table th {
+    text-align: left;
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    padding: 6px 8px;
+    border-bottom: 2px solid var(--color-border);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  .checks-table td {
+    padding: 8px;
+    border-bottom: 1px solid var(--color-border-light);
+    vertical-align: top;
+  }
+  .checks-table tr:last-child td { border-bottom: none; }
+  .checks-table .check-name { font-family: var(--font-mono); font-weight: 500; white-space: nowrap; }
+  .checks-table .check-detail { color: var(--color-text-secondary); font-size: 0.8125rem; max-width: 500px; word-break: break-word; }
+
+  /* ── Warnings section ── */
+  .warnings-section {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--color-warning-bg);
+    border-radius: var(--radius-md);
+  }
+  .warnings-section h4 {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: var(--color-warning);
+    margin-bottom: 6px;
+  }
+  .warnings-section ul {
+    list-style: none;
+    padding: 0;
+  }
+  .warnings-section li {
+    font-size: 0.8125rem;
+    font-family: var(--font-mono);
+    color: var(--color-text);
+    padding: 2px 0;
+  }
+  .warnings-section li::before {
+    content: "⚠";
+    margin-right: 6px;
+  }
+
+  .no-warnings {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: var(--color-success-bg);
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    color: var(--color-success);
+    font-weight: 500;
+  }
+
+  /* ── Description ── */
+  .desc-block {
+    margin-top: 12px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border-radius: var(--radius-md);
+    font-size: 0.8125rem;
+    color: var(--color-text-secondary);
+    line-height: 1.5;
+    max-height: 120px;
+    overflow: hidden;
+    position: relative;
+  }
+  .desc-block.expanded { max-height: none; }
+  .desc-toggle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: linear-gradient(transparent, #f9fafb);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 2px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    color: var(--color-accent);
+  }
+  .desc-block.expanded .desc-toggle { display: none; }
+
+  /* ── Footer ── */
+  .footer {
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--color-text-secondary);
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border-light);
+  }
+
+  /* ── Empty state ── */
+  .empty {
+    text-align: center;
+    padding: 48px 16px;
+    color: var(--color-text-secondary);
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+
+  @media (max-width: 639px) {
+    .skill-header .path { display: none; }
+    .filter-bar input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <h1>技能质量看板</h1>
+    <div class="subtitle">Skill Quality Dashboard — 扫描报告</div>
+  </div>
+  <div class="subtitle" id="scan-time"></div>
+</div>
+
+<div class="summary-grid" id="summary-grid"></div>
+
+<div class="filter-bar">
+  <label for="filter-grade">等级筛选：</label>
+  <select id="filter-grade">
+    <option value="all">全部</option>
+    <option value="A">A (≥90)</option>
+    <option value="B">B (70–89)</option>
+    <option value="C">C (40–69)</option>
+    <option value="D">D (<40)</option>
+  </select>
+
+  <label for="filter-warning">Warnings：</label>
+  <select id="filter-warning">
+    <option value="all">全部</option>
+    <option value="has">有 warnings</option>
+    <option value="none">无 warnings</option>
+  </select>
+
+  <label for="filter-search">搜索：</label>
+  <input id="filter-search" type="text" placeholder="技能名称...">
+</div>
+
+<div class="skill-list" id="skill-list"></div>
+
+<div class="footer">
+  数据来源：scripts/skill-quality-scan.mjs 扫描 khazix-skills-main
+  &nbsp;|&nbsp; 生成时间：<span id="footer-time"></span>
+</div>
+
+<script>
+(function() {
+  const DATA = {
+  "generatedAt": "2026-05-31T13:55:54.118Z",
+  "root": "C:\\Users\\admin\\source\\repos\\khazix-skills-main",
+  "skills": [
+    {
+      "path": "neat-freak/SKILL.md",
+      "name": "neat-freak",
+      "description": "> End-of-session knowledge cleanup with OCD-level rigor — reconciles project docs (CLAUDE.md, README.md, docs/) and agent memory against the code so nothing rots. 会话结束后对项目文档和记忆进行洁癖级审查与同步。MUST trigger when the user says: \"sync up\", \"tidy up docs\", \"update memory\", \"clean up docs\", \"/sync\", \"/neat\", \"同步一下\", \"整理文档\", \"整理一下\", \"更新记忆\", \"梳理一下\", \"收尾\", \"这个阶段做完了\", \"新人能直接上手\", or any phrase suggesting a dev milestone where knowledge needs reconciliation. Also trigger when the user reports stale docs, conflicting memories, or wants a clean handoff to teammates or other agents. Bare \"整理\" / \"tidy\" with prior dev context counts — do not under-trigger. Cross-platform: works on Claude Code, OpenAI Codex, OpenCode, and OpenClaw.",
+      "score": 57,
+      "warnings": [
+        "trigger-condition: no trigger or use-when clause found",
+        "boundaries-risk: no explicit boundaries or risk warnings",
+        "security: no security considerations found"
+      ],
+      "checks": [
+        {
+          "name": "frontmatter-name",
+          "pass": true,
+          "detail": "name: \"neat-freak\""
+        },
+        {
+          "name": "frontmatter-description",
+          "pass": true,
+          "detail": "description: \"> End-of-session knowledge cleanup with OCD-level rigor — re...\""
+        },
+        {
+          "name": "trigger-condition",
+          "pass": false,
+          "detail": "no trigger or use-when clause found"
+        },
+        {
+          "name": "workflow-steps",
+          "pass": true,
+          "detail": "found workflow/steps structure"
+        },
+        {
+          "name": "boundaries-risk",
+          "pass": false,
+          "detail": "no explicit boundaries or risk warnings"
+        },
+        {
+          "name": "security",
+          "pass": false,
+          "detail": "no security considerations found"
+        },
+        {
+          "name": "referenced-resources",
+          "pass": true,
+          "detail": "found resource/script references"
+        }
+      ]
+    },
+    {
+      "path": "hv-analysis/SKILL.md",
+      "name": "hv-analysis",
+      "description": "| 横纵分析法（Horizontal-Vertical Analysis）深度研究Skill。由数字生命卡兹克提出，融合了索绪尔的历时-共时分析、社会科学的纵向-横截面研究设计、商学院案例研究法与竞争战略分析的核心思想。 当用户想要系统性研究一个产品、公司、概念、技术或人物时使用。核心是双轴分析：纵轴追踪从诞生到当下的完整生命历程（以叙事故事呈现），横轴在当下时间截面上与竞品/同类进行系统性横向对比，最后交叉两条轴产出独到洞察。最终产出一份排版精美的PDF研究报告。 触发词包括但不限于：横纵分析、研究一下、帮我分析、深度研究、做个研究、调研一下、竞品分析、帮我看看这个东西怎么样、这个产品/公司/概念是怎么回事、帮我摸清楚、帮我搞懂、帮我做个deep research。 即使用户只是说\"帮我了解一下XX\"或\"XX是什么来头\"，只要上下文暗示需要系统性的深度研究（而非简单的概念解释），都应该触发。也适用于用户丢来一个产品名、公司名、技术名词说\"帮我研究一下这个\"的场景。 不要用于简单的名词解释（用户只是问\"XX是什么\"）、不要用于公众号写作（那个用khazix-writer）、不要用于纯标题摘要生成（用wechat-title）。",
+      "score": 71,
+      "warnings": [
+        "trigger-condition: no trigger or use-when clause found",
+        "boundaries-risk: no explicit boundaries or risk warnings"
+      ],
+      "checks": [
+        {
+          "name": "frontmatter-name",
+          "pass": true,
+          "detail": "name: \"hv-analysis\""
+        },
+        {
+          "name": "frontmatter-description",
+          "pass": true,
+          "detail": "description: \"| 横纵分析法（Horizontal-Vertical Analysis）深度研究Skill。由数字生命卡兹克提出，融合...\""
+        },
+        {
+          "name": "trigger-condition",
+          "pass": false,
+          "detail": "no trigger or use-when clause found"
+        },
+        {
+          "name": "workflow-steps",
+          "pass": true,
+          "detail": "found workflow/steps structure"
+        },
+        {
+          "name": "boundaries-risk",
+          "pass": false,
+          "detail": "no explicit boundaries or risk warnings"
+        },
+        {
+          "name": "security",
+          "pass": true,
+          "detail": "found security/auth references"
+        },
+        {
+          "name": "referenced-resources",
+          "pass": true,
+          "detail": "found resource/script references"
+        }
+      ]
+    },
+    {
+      "path": "khazix-writer/SKILL.md",
+      "name": "khazix-writer",
+      "description": "| 数字生命卡兹克（Khazix）的公众号长文写作skill。当用户需要撰写公众号文章、写稿子、续写文章、根据素材产出长文时使用。触发词包括但不限于：写文章、写稿子、帮我写、续写、扩写、公众号文章、长文、出稿、按我的风格写。即使用户只是说\"帮我把这个写成文章\"或\"用我的风格写一下\"，只要上下文涉及内容创作和公众号输出，都应该触发。也适用于用户丢过来一个PDF、brief、新闻链接、语音转文字或任何素材说\"帮我写篇文章\"的场景。不要用于短内容（小红书帖子、推特、朋友圈）或纯标题摘要生成（那个用wechat-title skill）。",
+      "score": 86,
+      "warnings": [
+        "security: no security considerations found"
+      ],
+      "checks": [
+        {
+          "name": "frontmatter-name",
+          "pass": true,
+          "detail": "name: \"khazix-writer\""
+        },
+        {
+          "name": "frontmatter-description",
+          "pass": true,
+          "detail": "description: \"| 数字生命卡兹克（Khazix）的公众号长文写作skill。当用户需要撰写公众号文章、写稿子、续写文章、根据素材产出长...\""
+        },
+        {
+          "name": "trigger-condition",
+          "pass": true,
+          "detail": "found trigger/when keywords"
+        },
+        {
+          "name": "workflow-steps",
+          "pass": true,
+          "detail": "found workflow/steps structure"
+        },
+        {
+          "name": "boundaries-risk",
+          "pass": true,
+          "detail": "found boundary/risk/safety language"
+        },
+        {
+          "name": "security",
+          "pass": false,
+          "detail": "no security considerations found"
+        },
+        {
+          "name": "referenced-resources",
+          "pass": true,
+          "detail": "found resource/script references"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 3,
+    "avgScore": 71,
+    "passRate": 67,
+    "byGrade": {
+      "A": 0,
+      "B": 2,
+      "C": 1,
+      "D": 0
+    }
+  }
+};
+
+  // ── Helpers ──
+  function gradeFor(score) {
+    if (score >= 90) return 'A';
+    if (score >= 70) return 'B';
+    if (score >= 40) return 'C';
+    return 'D';
+  }
+
+  function scoreClass(score) {
+    return 'score-' + gradeFor(score).toLowerCase();
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ── Render summary ──
+  function renderSummary() {
+    const s = DATA.summary;
+    const grid = document.getElementById('summary-grid');
+
+    const total = s.total;
+    const avg = s.avgScore;
+    const passRate = s.passRate;
+    const gradeKeys = ['A', 'B', 'C', 'D'];
+
+    let gradeBarHtml = '';
+    gradeKeys.forEach(g => {
+      const count = s.byGrade[g] || 0;
+      const pct = total > 0 ? (count / total * 100) : 0;
+      gradeBarHtml += `<span class="g-${g.toLowerCase()}" style="flex:${Math.max(pct, 1)}" title="${g}: ${count}"></span>`;
+    });
+
+    let legendHtml = '';
+    gradeKeys.forEach(g => {
+      const count = s.byGrade[g] || 0;
+      const colors = { A: 'var(--color-grade-a)', B: 'var(--color-grade-b)', C: 'var(--color-grade-c)', D: 'var(--color-grade-d)' };
+      legendHtml += `<span><i style="background:${colors[g]}"></i>${g} ${count}</span>`;
+    });
+
+    grid.innerHTML = `
+      <div class="summary-card">
+        <div class="label">技能总数</div>
+        <div class="value">${total}</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">平均分</div>
+        <div class="value ${scoreClass(avg)}">${avg}</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">通过率（≥70分）</div>
+        <div class="value">${passRate}%</div>
+      </div>
+      <div class="summary-card">
+        <div class="label">等级分布</div>
+        <div class="grade-bar">${gradeBarHtml}</div>
+        <div class="grade-legend">${legendHtml}</div>
+      </div>
+    `;
+
+    document.getElementById('scan-time').textContent = '扫描时间：' + new Date(DATA.generatedAt).toLocaleString('zh-CN');
+    document.getElementById('footer-time').textContent = new Date(DATA.generatedAt).toLocaleString('zh-CN');
+  }
+
+  // ── Render skill list ──
+  function renderList() {
+    const gradeFilter = document.getElementById('filter-grade').value;
+    const warningFilter = document.getElementById('filter-warning').value;
+    const searchTerm = document.getElementById('filter-search').value.toLowerCase().trim();
+
+    const filtered = DATA.skills.filter(sk => {
+      const g = gradeFor(sk.score);
+      if (gradeFilter !== 'all' && g !== gradeFilter) return false;
+      if (warningFilter === 'has' && sk.warnings.length === 0) return false;
+      if (warningFilter === 'none' && sk.warnings.length > 0) return false;
+      if (searchTerm && !sk.name.toLowerCase().includes(searchTerm) && !sk.path.toLowerCase().includes(searchTerm)) return false;
+      return true;
+    });
+
+    const list = document.getElementById('skill-list');
+
+    if (filtered.length === 0) {
+      list.innerHTML = '<div class="empty">没有匹配的技能</div>';
+      return;
+    }
+
+    list.innerHTML = filtered.map((sk, i) => {
+      const g = gradeFor(sk.score);
+      const checksHtml = sk.checks.map(c => `
+        <tr>
+          <td class="check-name">${escapeHtml(c.name)}</td>
+          <td><span class="badge ${c.pass ? 'badge-pass' : 'badge-fail'}">${c.pass ? 'PASS' : 'FAIL'}</span></td>
+          <td class="check-detail">${escapeHtml(c.detail)}</td>
+        </tr>
+      `).join('');
+
+      let warningsHtml;
+      if (sk.warnings.length > 0) {
+        warningsHtml = `
+          <div class="warnings-section">
+            <h4>Warnings (${sk.warnings.length})</h4>
+            <ul>${sk.warnings.map(w => `<li>${escapeHtml(w)}</li>`).join('')}</ul>
+          </div>`;
+      } else {
+        warningsHtml = '<div class="no-warnings">✓ 无 warnings</div>';
+      }
+
+      const descText = sk.description || '（无描述）';
+      const descTruncated = descText.length > 200;
+      const descHtml = `
+        <div class="desc-block${descTruncated ? '' : ''}" id="desc-${i}">
+          ${escapeHtml(descText)}
+          ${descTruncated ? '<div class="desc-toggle" onclick="toggleDesc(this)">展开全文 ▾</div>' : ''}
+        </div>`;
+
+      return `
+        <div class="skill-card" data-index="${i}">
+          <div class="skill-header" onclick="toggleCard(this)">
+            <span class="score-pill ${scoreClass(sk.score)}">${sk.score}</span>
+            <span class="name">${escapeHtml(sk.name)}</span>
+            <span class="path">${escapeHtml(sk.path)}</span>
+            <span class="chevron">▸</span>
+          </div>
+          <div class="skill-body">
+            <div style="display:flex;align-items:center;gap:8px;margin-top:12px">
+              <span class="badge badge-info">等级 ${g}</span>
+              <span class="badge ${sk.warnings.length > 0 ? 'badge-warn' : 'badge-pass'}">
+                ${sk.warnings.length > 0 ? sk.warnings.length + ' warnings' : '无 warnings'}
+              </span>
+            </div>
+            <h4 style="font-size:0.875rem;margin-top:12px;margin-bottom:2px;font-weight:600;color:var(--color-text-secondary)">描述</h4>
+            ${descHtml}
+            <h4 style="font-size:0.875rem;margin-top:12px;margin-bottom:2px;font-weight:600;color:var(--color-text-secondary)">检查项</h4>
+            <table class="checks-table">
+              <thead><tr><th>检查项</th><th>状态</th><th>详情</th></tr></thead>
+              <tbody>${checksHtml}</tbody>
+            </table>
+            ${warningsHtml}
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  // ── Interactions ──
+  window.toggleCard = function(header) {
+    header.closest('.skill-card').classList.toggle('open');
+  };
+
+  window.toggleDesc = function(btn) {
+    btn.closest('.desc-block').classList.toggle('expanded');
+  };
+
+  document.getElementById('filter-grade').addEventListener('change', renderList);
+  document.getElementById('filter-warning').addEventListener('change', renderList);
+  document.getElementById('filter-search').addEventListener('input', renderList);
+
+  // ── Init ──
+  renderSummary();
+  renderList();
+})();
+</script>
+</body>
+</html>

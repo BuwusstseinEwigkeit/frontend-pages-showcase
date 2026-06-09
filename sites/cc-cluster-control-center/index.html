@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC Cluster Control Center</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ── Header ──────────────────────────────────────────────────────────── -->
+<header>
+  <div class="header-brand">CC Cluster Control Center</div>
+  <div class="header-meta">Claude Code 集群控制台 &middot; Launch &middot; Monitor &middot; Summary</div>
+  <div class="header-stats">
+    <div class="stat"><div class="stat-value" id="s-tasks">0</div><div class="stat-label">Tasks</div></div>
+    <div class="stat"><div class="stat-value" id="s-prompts">0</div><div class="stat-label">Prompts</div></div>
+    <div class="stat"><div class="stat-value" id="s-parallel">4</div><div class="stat-label">Parallel</div></div>
+    <div class="stat"><div class="stat-value" id="s-estimate">-</div><div class="stat-label">Est Time</div></div>
+    <div class="stat"><div class="stat-value" id="clock">--:--:--</div><div class="stat-label">Clock</div></div>
+  </div>
+</header>
+
+<!-- ── Tab Bar ─────────────────────────────────────────────────────────── -->
+<nav class="tab-bar">
+  <button class="tab-btn active" data-tab="launch">Launch <span class="tab-key">1</span></button>
+  <button class="tab-btn" data-tab="monitor">Monitor <span class="tab-key">2</span></button>
+  <button class="tab-btn" data-tab="summary">Summary <span class="tab-key">3</span></button>
+</nav>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- PANEL: LAUNCH                                                         -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="panel active" id="panel-launch">
+
+  <!-- Options row -->
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header">
+      <span class="card-title">Wave Options</span>
+      <span class="card-badge badge-info">Invoke-CcWave</span>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="max-width:120px;">
+        <label for="opt-max-parallel">Max Parallel</label>
+        <input type="number" id="opt-max-parallel" value="4" min="1" max="16">
+      </div>
+      <div class="form-group" style="max-width:160px;">
+        <label>Log Directory</label>
+        <input type="text" value="(auto timestamp)" disabled style="opacity:0.5;">
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Left: task form -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Add Task</span>
+        </div>
+        <form id="task-form" autocomplete="off">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tf-name">Task Name *</label>
+              <input type="text" id="tf-name" placeholder="e.g. security-pr" required>
+            </div>
+            <div class="form-group" style="max-width:100px;">
+              <label for="tf-effort">Effort</label>
+              <select id="tf-effort">
+                <option value="low">low</option>
+                <option value="medium" selected>medium</option>
+                <option value="high">high</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tf-cwd">Working Directory *</label>
+              <input type="text" id="tf-cwd" placeholder="e.g. C:/Users/admin/source/repos/project" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="tf-prompt">Prompt Text (optional)</label>
+              <textarea id="tf-prompt" placeholder="粘贴 prompt 内容，留空则交互模式"></textarea>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="max-width:160px;">
+              <label for="tf-logname">Log Name</label>
+              <input type="text" id="tf-logname" placeholder="(same as task name)">
+            </div>
+          </div>
+          <div class="btn-group" style="margin-top:6px;">
+            <button type="submit" class="btn btn-primary" id="btn-add-task">+ Add Task</button>
+            <button type="button" class="btn" id="btn-clear-all">Clear All</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right: task list -->
+    <div>
+      <div class="card" style="height:100%;">
+        <div class="card-header">
+          <span class="card-title">Task Queue</span>
+          <span class="card-badge badge-ok" id="task-count-badge">0 tasks</span>
+        </div>
+        <div id="task-list">
+          <div class="empty-state"><div class="empty-state-icon">&#9634;</div>暂无任务</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Generate section -->
+  <div class="card" style="margin-top:4px;">
+    <div class="card-header">
+      <span class="card-title">Generate Manifest &amp; Command</span>
+    </div>
+    <div class="btn-group" style="margin-bottom:12px;">
+      <button class="btn btn-primary" id="btn-generate">Generate Manifest</button>
+      <button class="btn" id="btn-copy-cmd">Copy Launch Command</button>
+      <button class="btn" id="btn-dry-run-cmd">Copy DryRun Command</button>
+    </div>
+
+    <div class="grid-2">
+      <div>
+        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;font-weight:600;">Generated Manifest</div>
+        <pre class="code-block" id="manifest-output" style="min-height:120px;">{ "waves": [] }</pre>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;font-weight:600;">PowerShell Command</div>
+        <div class="code-block" id="command-output" style="min-height:120px;"><span class="cmd-comment"># 点击 Generate Manifest 后生成命令</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sample manifest -->
+  <details style="margin-top:4px;">
+    <summary style="font-size:13px;color:var(--text2);cursor:pointer;padding:10px 0;font-weight:500;">Sample Manifest (sample-wave.json)</summary>
+    <pre class="code-block" id="sample-manifest" style="margin-top:8px;"></pre>
+  </details>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- PANEL: MONITOR                                                        -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-monitor">
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header">
+      <span class="card-title">Watch Controls</span>
+      <span class="card-badge badge-info">Watch-CcWave</span>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="max-width:140px;">
+        <label for="watch-interval">Refresh Interval</label>
+        <select id="watch-interval">
+          <option value="3">3s</option>
+          <option value="5" selected>5s</option>
+          <option value="10">10s</option>
+          <option value="15">15s</option>
+        </select>
+      </div>
+      <div class="form-group" style="flex:0;">
+        <label>&nbsp;</label>
+        <button class="btn btn-primary" id="btn-watch-refresh">Refresh Now</button>
+      </div>
+      <div class="form-group" style="flex:2;">
+        <label>Manual Command</label>
+        <div class="code-block" style="padding:8px 12px;font-size:11px;max-height:none;">
+          <span class="cmd-action">.\\Watch-CcWave.ps1</span> <span class="cmd-string">-LogDir "C:\...\logs\latest"</span> <span class="cmd-action">-Interval 5</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+
+    <!-- Process list -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Running Processes</span>
+      </div>
+      <div id="watch-processes">
+        <div class="empty-state">点击 Refresh Now 获取进程快照</div>
+      </div>
+    </div>
+
+    <!-- Log files -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Log Files</span>
+      </div>
+      <div id="watch-logs">
+        <div class="empty-state">点击 Refresh Now 获取日志文件列表</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Service status (static display) -->
+  <div class="card" style="margin-top:4px;">
+    <div class="card-header">
+      <span class="card-title">Cluster Status</span>
+      <span class="card-badge badge-ok">Simulated</span>
+    </div>
+    <div class="grid-3" style="margin-bottom:12px;">
+      <div>
+        <div class="progress-row">
+          <span class="progress-label">claude</span>
+          <div class="progress-bar"><div class="progress-fill ok" style="width:100%"></div></div>
+          <span class="progress-num" style="color:var(--accent2)">2 / 2</span>
+        </div>
+      </div>
+      <div>
+        <div class="progress-row">
+          <span class="progress-label">powershell</span>
+          <div class="progress-bar"><div class="progress-fill ok" style="width:100%"></div></div>
+          <span class="progress-num" style="color:var(--accent2)">1 / 1</span>
+        </div>
+      </div>
+      <div>
+        <div class="progress-row">
+          <span class="progress-label">log growth</span>
+          <div class="progress-bar"><div class="progress-fill warn" style="width:65%"></div></div>
+          <span class="progress-num" style="color:var(--warn)">65%</span>
+        </div>
+      </div>
+    </div>
+    <table class="kv-table">
+      <tr><td>Log Directory</td><td>./logs/20260531_180000/</td></tr>
+      <tr><td>Total Log Size</td><td>128.4 KB</td></tr>
+      <tr><td>Last Refresh</td><td>--:--:--</td></tr>
+    </table>
+  </div>
+
+  <!-- Watch log viewer -->
+  <div class="card" style="margin-top:4px;">
+    <div class="card-header">
+      <span class="card-title">Monitor Log</span>
+    </div>
+    <div class="log-viewer" id="watch-log-viewer">
+      <div><span class="ts">--:--:--</span> <span class="ok">[INFO]</span> 等待首次 Refresh...</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<!-- PANEL: SUMMARY                                                        -->
+<!-- ══════════════════════════════════════════════════════════════════════ -->
+<div class="panel" id="panel-summary">
+
+  <div class="card" style="margin-bottom:14px;">
+    <div class="card-header">
+      <span class="card-title">Summary Options</span>
+      <span class="card-badge badge-info">Summarize-CcOutputs</span>
+    </div>
+    <div class="form-row">
+      <div class="form-group" style="flex:2;">
+        <label for="summary-logdir">Log Directory</label>
+        <input type="text" id="summary-logdir" placeholder="e.g. C:\...\logs\20260531_180000">
+      </div>
+      <div class="form-group" style="max-width:120px;">
+        <label for="summary-tail">Tail Lines</label>
+        <input type="number" id="summary-tail" value="20" min="5" max="100">
+      </div>
+      <div class="form-group" style="flex:0;">
+        <label>&nbsp;</label>
+        <div class="btn-group">
+          <button class="btn btn-primary" id="btn-summary-gen">Generate</button>
+          <button class="btn" id="btn-summary-copy">Copy Command</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Command output -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-title">PowerShell Command</span>
+    </div>
+    <pre class="code-block" id="summary-output" style="min-height:50px;"><span class="cmd-comment"># 配置参数后点击 Generate</span></pre>
+  </div>
+
+  <!-- Preview -->
+  <div class="card" style="margin-top:4px;">
+    <div class="card-header">
+      <span class="card-title">Summary Preview (Sample)</span>
+      <span class="card-badge badge-ok">示例数据</span>
+    </div>
+    <div id="summary-preview">
+      <div class="empty-state">点击 Generate 后预览汇总结果</div>
+    </div>
+  </div>
+
+  <!-- What it does -->
+  <details style="margin-top:8px;">
+    <summary style="font-size:13px;color:var(--text2);cursor:pointer;padding:10px 0;font-weight:500;">Summarize-CcOutputs.ps1 做了什么？</summary>
+    <div class="card" style="margin-top:8px;">
+      <table class="kv-table">
+        <tr><td>功能</td><td>扫描 .log 文件，提取每份日志的末尾 N 行和错误信息，生成 summary.md</td></tr>
+        <tr><td>参数 -LogDir</td><td>包含 .log 文件的目录</td></tr>
+        <tr><td>参数 -TailLines</td><td>每份日志提取的尾部行数 (默认 20)</td></tr>
+        <tr><td>输出</td><td>LogDir/summary.md，含 OK/ERROR 统计、错误摘要、尾部输出</td></tr>
+        <tr><td>典型用法</td><td>Invoke-CcWave 跑完后，用本脚本做后处理</td></tr>
+      </table>
+    </div>
+  </details>
+
+</div>
+
+<!-- ── Toast ───────────────────────────────────────────────────────────── -->
+<div class="toast" id="toast"></div>
+
+<!-- ── JS ──────────────────────────────────────────────────────────────── -->
+<script>
+// Embedded sample manifest for reference
+const sampleWave = {
+  "generated": "2026-05-31T18:00:00+08:00",
+  "waves": [
+    { "name": "security-pr", "cwd": "C:/Users/admin/source/repos/invasive-species-reporter", "promptFile": "prompts/security-pr.txt", "effort": "high", "logName": "security-pr" },
+    { "name": "test-coverage", "cwd": "C:/Users/admin/source/repos/invasive-species-reporter", "promptFile": "prompts/test-coverage.txt", "effort": "medium", "logName": "test-coverage" },
+    { "name": "api-contract", "cwd": "D:/外来物种识别", "promptFile": "prompts/api-contract.txt", "effort": "medium", "logName": "api-contract" },
+    { "name": "skill-quality", "cwd": "C:/Users/admin/source/repos/skill-manager", "promptFile": "prompts/skill-quality.txt", "effort": "medium", "logName": "skill-quality" }
+  ]
+};
+</script>
+<script src="control-center.js"></script>
+</body>
+</html>

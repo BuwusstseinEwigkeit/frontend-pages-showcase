@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Frontend Pages Showcase</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #18211f;
+      --muted: #65706b;
+      --paper: #fbfaf6;
+      --line: #d9ded4;
+      --moss: #486b55;
+      --copper: #b35f32;
+      --blue: #375f84;
+      --green-soft: #e5eee6;
+      --copper-soft: #f4e5dc;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Aptos", "Segoe UI", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+    }
+    header {
+      min-height: 42vh;
+      display: grid;
+      align-items: end;
+      padding: 56px clamp(20px, 5vw, 72px) 36px;
+      border-bottom: 1px solid var(--line);
+      background:
+        linear-gradient(90deg, rgba(72,107,85,.12), transparent 34%),
+        linear-gradient(135deg, rgba(179,95,50,.14), transparent 42%),
+        var(--paper);
+    }
+    .hero { max-width: 980px; }
+    .kicker {
+      margin: 0 0 18px;
+      color: var(--copper);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+    h1 {
+      max-width: 860px;
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(42px, 7vw, 92px);
+      line-height: .95;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+    .lede {
+      max-width: 760px;
+      margin: 24px 0 0;
+      font-size: clamp(17px, 2vw, 22px);
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    main {
+      padding: 34px clamp(20px, 5vw, 72px) 72px;
+    }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 1px;
+      border: 1px solid var(--line);
+      background: var(--line);
+      margin-bottom: 34px;
+    }
+    .stat {
+      background: rgba(255,255,255,.52);
+      padding: 18px;
+    }
+    .stat strong {
+      display: block;
+      font-size: 28px;
+      color: var(--moss);
+    }
+    .stat span {
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 14px;
+    }
+    .project-card {
+      min-height: 216px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 22px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,.58);
+    }
+    .project-card:nth-child(3n+1) { background: var(--green-soft); }
+    .project-card:nth-child(3n+2) { background: var(--copper-soft); }
+    .eyebrow {
+      margin: 0 0 12px;
+      font-size: 12px;
+      color: var(--blue);
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    h2 {
+      margin: 0;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+    .project-card p:not(.eyebrow) {
+      margin: 12px 0 0;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .open-link {
+      align-self: flex-start;
+      min-width: 84px;
+      padding: 10px 14px;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      text-decoration: none;
+      text-align: center;
+      font-weight: 800;
+      transition: background .18s ease, color .18s ease, transform .18s ease;
+    }
+    .open-link:hover {
+      background: var(--ink);
+      color: var(--paper);
+      transform: translateY(-2px);
+    }
+    .audit {
+      margin-top: 48px;
+      border-top: 1px solid var(--line);
+      padding-top: 24px;
+    }
+    .audit h2 { font-family: Georgia, "Times New Roman", serif; font-size: 32px; font-weight: 500; }
+    table {
+      width: 100%;
+      margin-top: 16px;
+      border-collapse: collapse;
+      font-size: 13px;
+      background: rgba(255,255,255,.46);
+    }
+    td, th {
+      padding: 12px;
+      border: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+      line-height: 1.45;
+    }
+    th { color: var(--moss); }
+    code {
+      background: #ece8df;
+      padding: 2px 5px;
+    }
+    @media (max-width: 720px) {
+      header { min-height: auto; padding-top: 40px; }
+      .stats { grid-template-columns: 1fr; }
+      .project-card { min-height: 188px; }
+      table { display: block; overflow-x: auto; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="hero">
+      <p class="kicker">GitHub Pages Bundle</p>
+      <h1>Frontend Pages Showcase</h1>
+      <p class="lede">从本机扫描出的纯前端项目与 HTML 展示页里，挑出适合公开发布的静态作品，做成一个统一入口。敏感或私密风险较高的页面已跳过。</p>
+    </div>
+  </header>
+  <main>
+    <section class="stats" aria-label="Publish summary">
+      <div class="stat"><strong>8</strong><span>已发布入口</span></div>
+      <div class="stat"><strong>7</strong><span>默认跳过类别</span></div>
+      <div class="stat"><strong>0</strong><span>原项目文件被修改</span></div>
+    </section>
+    <section class="grid" aria-label="Published pages">
+        <article class="project-card">
+          <div>
+            <p class="eyebrow">完整静态展示页</p>
+            <h2>外来物种哨兵 项目展示</h2>
+            <p>包含图片 assets，已排除本地日志文件。</p>
+          </div>
+          <a class="open-link" href="sites/invasive-species-showcase/" aria-label="Open 外来物种哨兵 项目展示">打开</a>
+        </article>
+        <article class="project-card">
+          <div>
+            <p class="eyebrow">Vite dist</p>
+            <h2>Skill Manager 静态构建</h2>
+            <p>使用已有 dist，并修正 Vite 根路径资源为相对路径；数据功能可能依赖后端 API。</p>
+          </div>
+          <a class="open-link" href="sites/skill-manager/" aria-label="Open Skill Manager 静态构建">打开</a>
+        </article>
+        <article class="project-card">
+          <div>
+            <p class="eyebrow">单文件 HTML</p>
+            <h2>技能质量看板</h2>
+            <p>独立静态看板。</p>
+          </div>
+          <a class="open-link" href="sites/skill-quality-dashboard/" aria-label="Open 技能质量看板">打开</a>
+        </article>
+        <article class="project-card">
+          <div>
+            <p class="eyebrow">单文件 HTML</p>
+            <h2>新项目探索作战图</h2>
+            <p>独立静态展示页。</p>
+          </div>
+          <a class="open-link" href="sites/project-exploration/" aria-label="Open 新项目探索作战图">打开</a>
+        </article>
+        <article class="project-card">
+          <div>
+            <p class="eyebrow">静态目录</p>
+            <h2>HTML 模板画廊</h2>
+            <p>包含模板画廊和两个模板页面，仅复制公开浏览所需文件。</p>
+          </div>
+          <a class="open-link" href="sites/frontend-output-guidelines/" aria-label="Open HTML 模板画廊">打开</a>
+        </article>
+        <article class="project-card">
+          <div>
+            <p class="eyebrow">单文件 HTML</p>
+            <h2>CC Sprint 控制塔</h2>
+            <p>独立静态控制台。</p>
+          </div>
+          <a class="open-link" href="sites/multi-project-control-tower/" aria-label="Open CC Sprint 控制塔">打开</a>
+        </article>
+        <article class="project-card">
+          <div>
+            <p class="eyebrow">静态目录</p>
+            <h2>CC Cluster Control Center</h2>
+            <p>包含 HTML、CSS、JS。</p>
+          </div>
+          <a class="open-link" href="sites/cc-cluster-control-center/" aria-label="Open CC Cluster Control Center">打开</a>
+        </article>
+        <article class="project-card">
+          <div>
+            <p class="eyebrow">单文件 HTML</p>
+            <h2>CC Cluster Run Report</h2>
+            <p>独立静态报告页。</p>
+          </div>
+          <a class="open-link" href="sites/cluster-run-report/" aria-label="Open CC Cluster Run Report">打开</a>
+        </article>
+
+    </section>
+    <section class="audit">
+      <h2>未公开项目</h2>
+      <p class="lede">这些文件不是不能发布，而是需要你确认隐私、密钥样例、内部路径或构建方式后再放到公网。</p>
+      <table>
+        <thead><tr><th>路径/范围</th><th>原因</th></tr></thead>
+        <tbody>
+      <tr><td>Documents/xwechat_files/...</td><td>微信接收文件可能包含私人来源，默认不公开。</td></tr>
+      <tr><td>Documents/Codex/.../edge-bookmarks.html</td><td>浏览器书签导出，含个人浏览信息，默认不公开。</td></tr>
+      <tr><td>source/repos/cc-switch-main/deplink.html</td><td>深链接测试页包含示例 API key、token 字段和可复制导入链接，默认跳过。</td></tr>
+      <tr><td>source/repos/cc-switch-main/src/index.html</td><td>Tauri/Vite 源入口，不能脱离构建产物单独发布。</td></tr>
+      <tr><td>source/repos/skill-manager/index.html</td><td>根入口会跳转到本机开发服务器，改用 dist 静态构建发布。</td></tr>
+      <tr><td>Documents/Codex/.../paper-starter/paper.html</td><td>论文模板带 Quarto 依赖目录且可能是草稿，默认不公开。</td></tr>
+      <tr><td>Documents/Codex/.../project-forge/output/*.html</td><td>多处页面含本机绝对路径、内部流程文字或 secret/token/auth 演示内容，默认不公开。</td></tr>
+
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>

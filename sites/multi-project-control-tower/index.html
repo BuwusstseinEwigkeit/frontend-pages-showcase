@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CC Sprint 控制塔 — 2026-05-31</title>
+<style>
+  :root {
+    --bg: #0c0e14;
+    --surface: #151820;
+    --surface-hover: #1c2030;
+    --border: #252a38;
+    --accent: #3fa8f5;
+    --accent-dim: rgba(63, 168, 245, 0.12);
+    --accent2: #34d399;
+    --accent2-dim: rgba(52, 211, 153, 0.10);
+    --text: #dde0e8;
+    --text2: #7c829a;
+    --danger: #f47067;
+    --warn: #e5a338;
+    --tag-bg: #1a1e2c;
+    --radius: 6px;
+    --font-mono: "Cascadia Mono", "Fira Code", ui-monospace, "SF Mono", Consolas, monospace;
+    --font-sans: "Segoe UI", "Microsoft YaHei", system-ui, -apple-system, sans-serif;
+  }
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    min-height: 100vh;
+  }
+
+  /* === Header === */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(12, 14, 20, 0.92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-brand {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    white-space: nowrap;
+    letter-spacing: -0.01em;
+  }
+  .header-meta {
+    font-size: 12px;
+    color: var(--text2);
+    white-space: nowrap;
+  }
+  .header-stats {
+    display: flex;
+    gap: 20px;
+    margin-left: auto;
+  }
+  .stat {
+    text-align: right;
+    line-height: 1.2;
+  }
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+  .stat-label {
+    font-size: 10px;
+    color: var(--text2);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  /* === Main grid === */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr));
+    gap: 16px;
+    padding: 20px 24px;
+    max-width: 1600px;
+  }
+
+  /* === Card === */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .card:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+  }
+  .card:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .card-title {
+    font-family: var(--font-mono);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.35;
+  }
+  .card-badge {
+    background: var(--accent-dim);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    line-height: 1.3;
+  }
+  .card-badge.wave8 {
+    background: rgba(52, 211, 153, 0.15);
+    color: var(--accent2);
+  }
+  .card-desc {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  /* === Metrics row === */
+  .metrics {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 14px;
+  }
+  .metric {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    color: var(--text2);
+  }
+  .metric-icon { font-size: 13px; line-height: 1; }
+  .metric-value {
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-weight: 600;
+  }
+
+  /* === Key files === */
+  .key-files { margin-bottom: 14px; }
+  .key-files-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .file-item {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text2);
+    padding: 3px 0;
+    border-bottom: 1px solid var(--border);
+    line-height: 1.45;
+  }
+  .file-item:last-child { border-bottom: none; }
+
+  /* === Next step === */
+  .next-step {
+    background: var(--accent2-dim);
+    border-left: 3px solid var(--accent2);
+    padding: 8px 12px;
+    border-radius: 0 var(--radius) var(--radius) 0;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .next-step-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent2);
+    margin-bottom: 3px;
+    font-weight: 600;
+  }
+
+  /* === Section divider === */
+  .section-divider {
+    padding: 20px 24px 0;
+    max-width: 1600px;
+  }
+  .section-divider h2 {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  /* === Wave 8 Batch Summary === */
+  .w8-summary-bar {
+    display: flex;
+    gap: 18px;
+    padding: 0 24px 14px;
+    max-width: 1600px;
+    flex-wrap: wrap;
+  }
+  .w8-summary-bar .stat { text-align: left; }
+  .w8-task-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 10px;
+    padding: 0 24px 20px;
+    max-width: 1600px;
+  }
+  .w8-task {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .w8-task:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent2);
+  }
+  .w8-task-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .w8-task-id {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    background: var(--tag-bg);
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .w8-task-name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .w8-task-status {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: var(--accent2-dim);
+    color: var(--accent2);
+  }
+  .w8-task-status.retry {
+    background: var(--accent-dim);
+    color: var(--accent);
+  }
+  .w8-task-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.45;
+  }
+  .w8-task-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+  }
+  .w8-task-meta .files-count {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .w8-task-meta .size {
+    color: var(--accent2);
+    font-weight: 600;
+  }
+  .w8-task-domain {
+    font-size: 11px;
+    color: var(--text2);
+  }
+
+  /* === Next Wave Queue === */
+  .wave-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 10px;
+    padding: 0 24px 20px;
+    max-width: 1600px;
+  }
+  .wave-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .wave-card:hover {
+    background: var(--surface-hover);
+    border-color: var(--accent);
+  }
+  .wave-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .wave-id {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    background: var(--tag-bg);
+    padding: 2px 6px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+  .wave-project {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text2);
+  }
+  .wave-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.4;
+  }
+  .wave-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.45;
+  }
+  .wave-meta {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .wave-status {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .wave-status.ready { background: var(--accent2-dim); color: var(--accent2); }
+  .wave-status.queued { background: var(--accent-dim); color: var(--accent); }
+  .wave-status.blocked { background: rgba(244,112,103,0.12); color: var(--danger); }
+  .wave-status.completed { background: var(--accent2-dim); color: var(--accent2); }
+  .wave-priority {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+  }
+  .wave-priority.high { color: var(--danger); }
+  .wave-priority.medium { color: var(--warn); }
+  .wave-priority.low { color: var(--text2); }
+  .wave-effort {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    margin-left: auto;
+  }
+  .wave-blocked-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--danger);
+  }
+
+  /* === Wave Summary Bar === */
+  .wave-summary {
+    display: flex;
+    gap: 18px;
+    padding: 10px 24px 18px;
+    max-width: 1600px;
+    flex-wrap: wrap;
+  }
+  .wave-summary .stat {
+    text-align: left;
+  }
+
+  /* === Automation Status === */
+  .auto-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 10px;
+    padding: 0 24px 20px;
+    max-width: 1600px;
+  }
+  .auto-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    transition: background 0.15s;
+  }
+  .auto-card:hover {
+    background: var(--surface-hover);
+  }
+  .auto-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .auto-name {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .auto-type {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text2);
+    background: var(--tag-bg);
+    padding: 2px 6px;
+    border-radius: 3px;
+  }
+  .auto-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    margin-left: auto;
+    flex-shrink: 0;
+  }
+  .auto-status-dot.active { background: var(--accent2); }
+  .auto-status-dot.new { background: var(--accent); }
+  .auto-status-dot.pending { background: var(--warn); }
+  .auto-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.45;
+  }
+  .auto-coverage {
+    margin-top: 12px;
+  }
+  .auto-coverage-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text2);
+    margin-bottom: 6px;
+  }
+  .coverage-bar-bg {
+    height: 6px;
+    background: var(--tag-bg);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .coverage-bar-fill {
+    height: 100%;
+    background: var(--accent2);
+    border-radius: 3px;
+    transition: width 0.4s ease;
+  }
+  .coverage-pct {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--accent2);
+    margin-top: 4px;
+  }
+
+  /* === Footer === */
+  footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text2);
+    font-size: 11px;
+    font-family: var(--font-mono);
+  }
+  footer code {
+    color: var(--accent);
+  }
+
+  /* === Responsive === */
+  @media (max-width: 640px) {
+    header {
+      padding: 10px 14px;
+      gap: 10px;
+    }
+    .header-stats { gap: 14px; }
+    .stat-value { font-size: 13px; }
+    .grid {
+      padding: 12px 10px;
+      gap: 12px;
+    }
+    .card { padding: 16px; }
+    .metrics { gap: 10px; flex-wrap: wrap; }
+    .wave-grid, .auto-grid, .w8-task-grid { padding: 0 10px 14px; }
+    .section-divider { padding: 16px 10px 0; }
+    .wave-summary, .w8-summary-bar { padding: 8px 10px 14px; gap: 12px; }
+  }
+
+  /* === Print === */
+  @media print {
+    header { position: static; background: #fff; border-bottom-color: #ddd; }
+    body { background: #fff; color: #111; }
+    .card, .wave-card, .auto-card, .w8-task { background: #fff; border-color: #ddd; break-inside: avoid; }
+    .card-title, .card-badge, .stat-value, .file-item, .metric-value { color: #111; }
+    .card-badge { background: #eef; }
+    .next-step { background: #efe; border-left-color: #0a0; }
+    .section-divider h2 { color: #111; border-bottom-color: #ddd; }
+    .wave-title, .auto-name, .w8-task-name { color: #111; }
+    .wave-desc, .wave-project, .auto-desc, .w8-task-desc { color: #555; }
+    .wave-status.ready, .w8-task-status { background: #dfd; color: #060; }
+    .wave-status.queued { background: #def; color: #06c; }
+    .wave-status.blocked { background: #fdd; color: #c00; }
+    .auto-status-dot.active { background: #0a0; }
+    .auto-status-dot.new { background: #06c; }
+    footer { border-top-color: #ddd; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">CC Sprint 控制塔</div>
+  <div class="header-meta">Claude Code 集群产物总览 &middot; 2026-05-31 &middot; Wave 8</div>
+  <div class="header-stats">
+    <div class="stat"><div class="stat-value" id="s-projects">-</div><div class="stat-label">项目</div></div>
+    <div class="stat"><div class="stat-value" id="s-files">-</div><div class="stat-label">文件</div></div>
+    <div class="stat"><div class="stat-value" id="s-bytes">-</div><div class="stat-label">总产出</div></div>
+    <div class="stat"><div class="stat-value" id="s-workers">-</div><div class="stat-label">Workers</div></div>
+    <div class="stat"><div class="stat-value" id="s-tasks">-</div><div class="stat-label">Batch Tasks</div></div>
+  </div>
+</header>
+
+<div class="grid" id="grid"></div>
+
+<!-- Wave 8 Batch Summary -->
+<div class="section-divider"><h2>Wave 8 &mdash; Batch Run Summary</h2></div>
+<div class="w8-summary-bar" id="w8-summary"></div>
+<div class="w8-task-grid" id="w8-grid"></div>
+
+<!-- Next Wave Queue -->
+<div class="section-divider"><h2>Next Wave &mdash; Task Queue</h2></div>
+<div class="wave-summary" id="wave-summary"></div>
+<div class="wave-grid" id="wave-grid"></div>
+
+<!-- Automation Status -->
+<div class="section-divider"><h2>Automation Status</h2></div>
+<div class="auto-grid" id="auto-grid"></div>
+
+<footer>Generated by multi-project-control-tower &middot; Updated after Wave 8 &middot; Open <code>data.json</code> for raw data &middot; <code>wave8-summary.json</code> for Wave 8 detail &middot; Run <code>update-dashboard.ps1</code> to refresh</footer>
+
+<script>
+function formatBytes(b) {
+  if (b < 1024) return b + ' B';
+  if (b < 1048576) return (b / 1024).toFixed(1) + ' KB';
+  return (b / 1048576).toFixed(2) + ' MB';
+}
+
+const embeddedData = {
+  "summary": {
+    "total_bytes": 1144993,
+    "total_files": 112,
+    "total_projects": 14
+  },
+  "projects": [
+    {
+      "id": "invasive-species-reporter",
+      "total_bytes": 54570,
+      "next_steps": "提交3个独立PR: 安全/健壮性 -> 测试覆盖 -> 工程质量",
+      "description": "微信小程序 — 外来物种识别与上报",
+      "name": "外来物种哨兵 (Invasive Species Reporter)",
+      "worker_count": 0,
+      "file_count": 4,
+      "sprint_dir": "C:/Users/admin/source/repos/invasive-species-reporter/docs/cc-sprint-2026-05-31",
+      "key_files": [
+        "01_acceptance_test_matrix.md (22KB)",
+        "03_next_pr_plan.md (10KB)",
+        "02_security_and_abuse_backlog.md (10KB)",
+        "00_release_readiness.md (10KB)"
+      ]
+    },
+    {
+      "id": "waivalues-species-id",
+      "total_bytes": 65921,
+      "next_steps": "执行模型评估，敲定API合约细节，推进集成",
+      "description": "AI模型评估、API合约、集成路线图",
+      "name": "外来物种识别 (模型评估)",
+      "worker_count": 2,
+      "file_count": 6,
+      "sprint_dir": "D:/外来物种识别/cc冲刺-2026-05-31",
+      "key_files": [
+        "workers/W02_api_contract.md (25KB)",
+        "workers/W01_inventory.md (10KB)",
+        "01_api_contract_to_miniprogram.md (9KB)",
+        "03_integration_roadmap.md (8KB)"
+      ]
+    },
+    {
+      "id": "skill-manager",
+      "total_bytes": 44750,
+      "next_steps": "按质量模型改进Skill质量，执行测试计划",
+      "description": "Skill管理平台 — 产品缺口分析与质量模型",
+      "name": "Skill Manager",
+      "worker_count": 2,
+      "file_count": 7,
+      "sprint_dir": "C:/Users/admin/source/repos/skill-manager/docs/cc-sprint-2026-05-31",
+      "key_files": [
+        "workers/01_tech_test_audit.md (13KB)",
+        "workers/00_product_ux_audit.md (9KB)",
+        "03_test_plan.md (5KB)",
+        "01_skill_quality_model.md (5KB)"
+      ]
+    },
+    {
+      "id": "khazix-skills",
+      "total_bytes": 84281,
+      "next_steps": "按批量计划逐步合并改进补丁，发布新版本",
+      "description": "个人技能库审计、改进补丁与发布包",
+      "name": "Khazix Skills (技能库)",
+      "worker_count": 2,
+      "file_count": 7,
+      "sprint_dir": "C:/Users/admin/source/repos/khazix-skills-main/cc-sprint-2026-05-31",
+      "key_files": [
+        "workers/audit_writer_hv.md (19KB)",
+        "workers/audit_neat_prompts.md (18KB)",
+        "01_improvement_patches.md (16KB)",
+        "00_skill_library_audit.md (14KB)"
+      ]
+    },
+    {
+      "id": "cc-switch",
+      "total_bytes": 43761,
+      "next_steps": "按PR切片分步实现，优先处理安全审计中的问题",
+      "description": "Credit燃烧场景、切换安全审计、批处理Runner",
+      "name": "CC Switch (模型切换器)",
+      "worker_count": 1,
+      "file_count": 6,
+      "sprint_dir": "C:/Users/admin/source/repos/cc-switch-main/docs/cc-sprint-2026-05-31",
+      "key_files": [
+        "02_feature_spec_batch_runner.md (11KB)",
+        "workers/worker_1_tests_release_audit.md (9KB)",
+        "03_pr_slices.md (8KB)",
+        "01_provider_switch_safety_audit.md (6KB)"
+      ]
+    },
+    {
+      "id": "claude-auto-resume",
+      "total_bytes": 7763,
+      "next_steps": "实现Windows批处理自动恢复脚本，验证端到端恢复",
+      "description": "集群自动恢复 — 多任务长跑场景",
+      "name": "Claude Auto Resume",
+      "worker_count": 0,
+      "file_count": 2,
+      "sprint_dir": "C:/Users/admin/source/repos/claude-auto-resume/docs/cc-sprint-2026-05-31",
+      "key_files": [
+        "01_windows_batch_recipe.md (5KB)",
+        "00_cluster_resume_use_case.md (3KB)"
+      ]
+    },
+    {
+      "id": "frontend-slides",
+      "total_bytes": 24848,
+      "next_steps": "完善示例Brief，对齐内容生产流水线定位",
+      "description": "可编辑前端幻灯片 — 能力地图与示例",
+      "name": "Frontend Slides Editable",
+      "worker_count": 2,
+      "file_count": 6,
+      "sprint_dir": "D:/frontend-slides-editable/docs/cc-sprint-2026-05-31",
+      "key_files": [
+        "02_example_briefs.md (5KB)",
+        "workers/qa-examples.md (4KB)",
+        "workers/runtime-audit.md (4KB)",
+        "03_demo_notes.md (4KB)"
+      ]
+    },
+    {
+      "id": "autoclaw",
+      "total_bytes": 19262,
+      "next_steps": "聚焦已有集成点，避免重复造轮子，完善工作台",
+      "description": "个人Agent工作台 — 身份审计与集成点分析",
+      "name": "AutoClaw",
+      "worker_count": 2,
+      "file_count": 6,
+      "sprint_dir": "D:/AutoClaw/.autoclaw/cc-sprint-2026-05-31",
+      "key_files": [
+        "02_integration_points.md (6KB)",
+        "03_do_not_build_list.md (5KB)",
+        "00_identity_and_capability_audit.md (3KB)",
+        "01_personal_agent_workbench_plan.md (3KB)"
+      ]
+    },
+    {
+      "id": "robomaster",
+      "total_bytes": 126232,
+      "next_steps": "执行PDM协议管理，处理风险登记中的高优先级项",
+      "description": "机器人项目全景图、风险登记、PDM协议",
+      "name": "RoBoMaster",
+      "worker_count": 4,
+      "file_count": 8,
+      "sprint_dir": "D:/RoBoMaster/cc冲刺-2026-05-31",
+      "key_files": [
+        "workers/00_project_map_draft.md (25KB)",
+        "00_project_map.md (25KB)",
+        "workers/03_lightweight_pdm_protocol_draft.md (14KB)",
+        "workers/02_risk_register_draft.md (14KB)"
+      ]
+    },
+    {
+      "id": "claude-code-best-practice",
+      "total_bytes": 47909,
+      "next_steps": "按运营手册优化集群，执行明日过期前的计划",
+      "description": "集群运营手册、Prompt模板、故障模式分析",
+      "name": "Claude Code Best Practice",
+      "worker_count": 1,
+      "file_count": 5,
+      "sprint_dir": "D:/claude-code-best-practice/reports/cc-sprint-2026-05-31",
+      "key_files": [
+        "00_cluster_playbook.md (11KB)",
+        "02_failure_modes.md (10KB)",
+        "01_prompt_templates.md (10KB)",
+        "workers/research-development-workflows-impl.md (8KB)"
+      ]
+    },
+    {
+      "id": "project-forge",
+      "total_bytes": 85600,
+      "next_steps": "执行 8 个 Forge Task，填充 output/ 和 prompts/ 目录",
+      "description": "Personal Project Incubator — Idea雷达 -> Wave Manifest -> Prompt Cards",
+      "name": "Project Forge [Wave 8]",
+      "worker_count": 0,
+      "file_count": 6,
+      "sprint_dir": "personal-project-incubator/project-forge/",
+      "key_files": [
+        "index.html (40KB)",
+        "forge_manifest.json (8 tasks)",
+        "prompt_cards.md (8 cards)",
+        "next_wave_from_ideas.json (8 ideas)"
+      ],
+      "wave": "Wave 8"
+    },
+    {
+      "id": "cc-switch-provider-burn",
+      "total_bytes": 72192,
+      "next_steps": "实现 credit-burn-workflow Phase 1-3，编写 YAML 任务模板",
+      "description": "CC Switch Provider Burn — DryRun 计划器 + 5阶段生命周期 + 故障恢复",
+      "name": "CC Switch Provider Burn [Wave 8]",
+      "worker_count": 0,
+      "file_count": 3,
+      "sprint_dir": "C:/Users/admin/source/repos/cc-switch-main/docs/cc-sprint-2026-05-31/provider-burn/",
+      "key_files": [
+        "cc-credit-burn-plan.md",
+        "credit-burn-workflow.md (5 phases)",
+        "failure-recovery.md (10 error codes)",
+        "provider-profile-schema.json"
+      ],
+      "wave": "Wave 8"
+    },
+    {
+      "id": "invasive-mock-client",
+      "total_bytes": 32768,
+      "next_steps": "接入 ZHIPU_API_KEY，运行 mock client 验证端到端流程",
+      "description": "Invasive Species Mock Integration Client — Node.js mock + API contract",
+      "name": "Invasive Mock Client [Wave 8]",
+      "worker_count": 0,
+      "file_count": 4,
+      "sprint_dir": "C:/Users/admin/source/repos/invasive-species-reporter/docs/cc-sprint-2026-05-31/mock-integration-client/",
+      "key_files": [
+        "recognition-client.example.js",
+        "contract-checklist.md (20 items)",
+        "integration-flow.md",
+        "README.md"
+      ],
+      "wave": "Wave 8"
+    },
+    {
+      "id": "autoclaw-command-palette",
+      "total_bytes": 44032,
+      "next_steps": "集成到 AutoClaw 主界面，替换现有命令触发方式",
+      "description": "AutoClaw Command Palette — 24 命令 × 6 分类的键盘驱动命令面板",
+      "name": "AutoClaw Command Palette [Wave 8]",
+      "worker_count": 0,
+      "file_count": 4,
+      "sprint_dir": "D:/AutoClaw/.autoclaw/cc-sprint-2026-05-31/command_palette_prototype/",
+      "key_files": [
+        "index.html (43KB)",
+        "commands.json (24 commands)",
+        "DESIGN_CHECK.md",
+        "README.md"
+      ],
+      "wave": "Wave 8"
+    },
+    {
+      "id": "robomaster-review-slicer",
+      "total_bytes": 180224,
+      "next_steps": "逐批次人工审核 Delete/Keep/Archive 决策，处理 1420 项 review items",
+      "description": "RoBoMaster Review Queue Slicer — 8446 行 PDM 审查队列 -> 31 批次 × 6 风险组",
+      "name": "RoBoMaster Review Slicer [Wave 8]",
+      "worker_count": 0,
+      "file_count": 34,
+      "sprint_dir": "D:/RoBoMaster/cc冲刺-2026-05-31/review_queue_slicer/",
+      "key_files": [
+        "slice_review_queue.ps1 (272 lines)",
+        "batch_index.md (31 batches)",
+        "batches/batch-003 to batch-028 (name_conflicts)",
+        "README.md"
+      ],
+      "wave": "Wave 8"
+    }
+  ],
+  "generated": "2026-05-31T22:30:00+08:00"
+};
+
+const embeddedWave8 = {
+  "generated": "2026-05-31T22:30:00+08:00",
+  "stats": { "tasks": 6, "success": 6, "error": 0, "files": 55, "output_bytes": 552812, "retries": 1 },
+  "tasks": [
+    { "id": "01", "name": "Project Forge", "status": "success", "domain": "Personal Project Incubator", "files": 6, "size": "~84 KB", "desc": "25 ideas -> Top 8 -> 8 prompt cards + interactive HTML console. cc-ops-kit manifests ready.", "retry": false },
+    { "id": "02", "name": "CC Switch Credit Plan CLI", "status": "success", "domain": "Credit/Budget Management", "files": 3, "size": "~70 KB", "desc": "Dry-run planner rewritten. Fixed $manifest PS5.1 bug. Both modes smoke-tested.", "retry": false },
+    { "id": "03", "name": "Invasive Mock Client", "status": "success", "domain": "Species Reporting API", "files": 4, "size": "~32 KB", "desc": "Node.js mock client + 20-item API contract checklist. Requires ZHIPU_API_KEY.", "retry": false },
+    { "id": "04", "name": "AutoClaw Command Palette", "status": "success", "domain": "AutoClaw IDE/Tool", "files": 4, "size": "~43 KB", "desc": "24-command palette, 6 categories. Ctrl+K open, Alt+1-7 categories. File:// compatible.", "retry": false },
+    { "id": "05", "name": "RoBoMaster Review Slicer", "status": "success", "domain": "RoBoMaster PDM Review", "files": 34, "size": "~176 KB", "desc": "8446-line queue -> 31 batches, 6 risk groups, 1420 items. Name conflicts 90%.", "retry": false },
+    { "id": "06", "name": "Frontend Templates Gallery", "status": "success", "domain": "Frontend Design Guidelines", "files": 2, "size": "~37 KB", "desc": "5-panel gallery: Preview, Snippets (15), Red-line Checklist, Anti-patterns, Comparison.", "retry": true }
+  ]
+};
+
+const embeddedWave = {
+  "generated": "2026-05-31T22:30:00+08:00",
+  "queue": [
+    { "id": "NW-001", "project_name": "外来物种哨兵", "title": "提交安全/健壮性 PR", "priority": "high", "status": "queued", "blocked_by": [], "description": "安全与滥用防护审计已就绪，需先合并此 PR 才能推进测试覆盖。", "est_effort": "2h" },
+    { "id": "NW-002", "project_name": "外来物种哨兵", "title": "提交测试覆盖 PR", "priority": "high", "status": "queued", "blocked_by": ["NW-001"], "description": "验收测试矩阵 (22KB) 已产出，待安全 PR 合并后跟进。", "est_effort": "2h" },
+    { "id": "NW-003", "project_name": "外来物种识别(模型)", "title": "敲定 API 合约并推进集成", "priority": "high", "status": "ready", "blocked_by": [], "description": "API 合约文档 (25KB) 与集成路线图已产出，需与小程序端对齐。", "est_effort": "3h" },
+    { "id": "NW-004", "project_name": "Skill Manager", "title": "按质量模型改进 Skill 质量", "priority": "medium", "status": "ready", "blocked_by": [], "description": "质量模型与测试计划已产出，需逐项执行改进。", "est_effort": "4h" },
+    { "id": "NW-005", "project_name": "Khazix Skills", "title": "合并改进补丁并发布新版本", "priority": "medium", "status": "ready", "blocked_by": [], "description": "审计报告与改进补丁已产出，需逐批合并。", "est_effort": "3h" },
+    { "id": "NW-006", "project_name": "CC Switch", "title": "按 PR 切片实现", "priority": "medium", "status": "queued", "blocked_by": [], "description": "安全审计与 PR 切片文档已就绪，需按优先级逐步实现。", "est_effort": "5h" },
+    { "id": "NW-007", "project_name": "Claude Auto Resume", "title": "实现 Windows 批处理自动恢复", "priority": "high", "status": "ready", "blocked_by": [], "description": "批处理食谱已就绪，需编码并端到端验证。", "est_effort": "2h" },
+    { "id": "NW-008", "project_name": "Frontend Slides", "title": "完善示例 Brief", "priority": "low", "status": "ready", "blocked_by": [], "description": "示例 Briefs 与 QA 产出已就绪，需完善内容。", "est_effort": "2h" },
+    { "id": "NW-009", "project_name": "RoBoMaster", "title": "执行 PDM 协议管理", "priority": "high", "status": "blocked", "blocked_by": [], "description": "PDM 协议草案与风险登记已产出，需确认团队协作流程。", "est_effort": "6h" },
+    { "id": "NW-010", "project_name": "AutoClaw", "title": "聚焦已有集成点", "priority": "low", "status": "ready", "blocked_by": [], "description": "集成点分析与 Do-Not-Build 列表已就绪。", "est_effort": "2h" },
+    { "id": "NW-011", "project_name": "CC Best Practice", "title": "按运营手册优化集群", "priority": "medium", "status": "ready", "blocked_by": [], "description": "运营手册与故障模式分析已产出，需逐项落地。", "est_effort": "3h" },
+    { "id": "NW-012", "project_name": "Project Forge", "title": "执行 8 个 Forge Task", "priority": "medium", "status": "ready", "blocked_by": [], "description": "Forge manifest + prompt cards 已就绪，需执行 8 个 bounded task 填充 output/。", "est_effort": "4h" },
+    { "id": "NW-013", "project_name": "CC Switch Provider Burn", "title": "实现 Credit Burn Phase 1-3", "priority": "high", "status": "ready", "blocked_by": [], "description": "5阶段生命周期文档 + DryRun 计划器已就绪，需编码 YAML 解析和执行引擎。", "est_effort": "6h" },
+    { "id": "NW-014", "project_name": "RoBoMaster Review", "title": "逐批次审核 1420 项 review items", "priority": "high", "status": "queued", "blocked_by": [], "description": "31 批次已生成 (Delete/Keep/Archive 表格)，需人工逐批决策。", "est_effort": "8h" }
+  ],
+  "summary": { "total_tasks": 14, "ready": 9, "queued": 4, "blocked": 1, "completed": 0, "est_total_hours": 52, "high_priority": 7, "medium_priority": 5, "low_priority": 2 }
+};
+
+const embeddedAuto = [
+  { "name": "update-dashboard.ps1", "type": "Data Pipeline", "status": "active", "desc": "扫描 sprint 目录，重新生成 data.json 并同步 index.html 内嵌数据" },
+  { "name": "Worker Sub-agents", "type": "Parallelism", "status": "active", "desc": "12 个 worker 子代理已产出，覆盖 7/14 个项目" },
+  { "name": "File:// Fallback", "type": "Resilience", "status": "active", "desc": "index.html 检测 file:// 协议时自动使用内嵌数据" },
+  { "name": "Wave 8 Batch Runner", "type": "Orchestration", "status": "active", "desc": "6 个 concurrent Claude Code agents, 100% success rate" },
+  { "name": "Next Wave Queue", "type": "Task Queue", "status": "active", "desc": "next-wave.json 驱动的任务队列，支持优先级/依赖/阻塞追踪" },
+  { "name": "Control Tower UI", "type": "Dashboard", "status": "active", "desc": "项目卡片 + Wave 8 摘要 + Next Wave + Automation Status 面板" },
+  { "name": "PR Auto-Create", "type": "CI/CD", "status": "pending", "desc": "待接入 gh CLI 实现 PR 自动创建" },
+  { "name": "Scheduled Refresh", "type": "Cron", "status": "pending", "desc": "待配置 update-dashboard.ps1 定时触发" },
+  { "name": "Worker Output QC", "type": "Quality", "status": "pending", "desc": "待实现 Worker 产出自动质检（格式/字数/必填字段）" }
+];
+
+function renderDashboard(data) {
+  const s = data.summary;
+  document.getElementById('s-projects').textContent = s.total_projects;
+  document.getElementById('s-files').textContent = s.total_files;
+  document.getElementById('s-bytes').textContent = formatBytes(s.total_bytes);
+  document.getElementById('s-tasks').textContent = '51';
+
+  const totalWorkers = data.projects.reduce((a, p) => a + p.worker_count, 0);
+  document.getElementById('s-workers').textContent = totalWorkers;
+
+  const grid = document.getElementById('grid');
+  data.projects.forEach(p => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const isW8 = p.wave === 'Wave 8';
+    const filesHtml = p.key_files.map(f => '<div class="file-item">' + f + '</div>').join('');
+    card.innerHTML =
+      '<div class="card-header">' +
+        '<div class="card-title">' + p.name + '</div>' +
+        '<div class="card-badge' + (isW8 ? ' wave8' : '') + '">' + p.file_count + ' docs' + (p.worker_count ? ' + ' + p.worker_count + 'w' : '') + (isW8 ? ' W8' : '') + '</div>' +
+      '</div>' +
+      '<div class="card-desc">' + p.description + '</div>' +
+      '<div class="metrics">' +
+        '<div class="metric"><span class="metric-icon">&#9638;</span> <span class="metric-value">' + p.file_count + '</span> 文件</div>' +
+        '<div class="metric"><span class="metric-icon">&#8599;</span> <span class="metric-value">' + formatBytes(p.total_bytes) + '</span></div>' +
+        '<div class="metric"><span class="metric-icon">&#9654;</span> <span class="metric-value">' + p.worker_count + '</span> workers</div>' +
+      '</div>' +
+      '<div class="key-files">' +
+        '<div class="key-files-title">重点文件</div>' +
+        filesHtml +
+      '</div>' +
+      '<div class="next-step">' +
+        '<div class="next-step-label">' + (isW8 ? 'Wave 8 产出 + 下一步' : '下一步建议') + '</div>' +
+        p.next_steps +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function renderWave8(w8) {
+  var sum = w8.stats;
+  var summaryEl = document.getElementById('w8-summary');
+  summaryEl.innerHTML =
+    '<div class="stat"><div class="stat-value" style="color:var(--accent2)">' + sum.success + '/' + sum.tasks + '</div><div class="stat-label">Success/Total</div></div>' +
+    '<div class="stat"><div class="stat-value">' + sum.files + '</div><div class="stat-label">Files</div></div>' +
+    '<div class="stat"><div class="stat-value" style="color:var(--accent)">' + formatBytes(sum.output_bytes) + '</div><div class="stat-label">Output</div></div>' +
+    '<div class="stat"><div class="stat-value" style="color:var(--accent2)">0</div><div class="stat-label">Errors</div></div>' +
+    '<div class="stat"><div class="stat-value" style="color:var(--accent)">' + sum.retries + '</div><div class="stat-label">Retries</div></div>';
+
+  var grid = document.getElementById('w8-grid');
+  w8.tasks.forEach(function(t) {
+    var card = document.createElement('div');
+    card.className = 'w8-task';
+    card.innerHTML =
+      '<div class="w8-task-header">' +
+        '<span class="w8-task-id">' + t.id + '</span>' +
+        '<span class="w8-task-name">' + t.name + '</span>' +
+        '<span class="w8-task-status' + (t.retry ? ' retry' : '') + '">' + (t.retry ? 'retry+ok' : t.status) + '</span>' +
+      '</div>' +
+      '<div class="w8-task-domain">' + t.domain + '</div>' +
+      '<div class="w8-task-desc">' + t.desc + '</div>' +
+      '<div class="w8-task-meta">' +
+        '<span class="files-count">' + t.files + ' files</span>' +
+        '<span class="size">' + t.size + '</span>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function renderWaveQueue(wave) {
+  var sum = wave.summary;
+  var summaryEl = document.getElementById('wave-summary');
+  summaryEl.innerHTML =
+    '<div class="stat"><div class="stat-value" style="color:var(--accent)">' + sum.ready + '</div><div class="stat-label">Ready</div></div>' +
+    '<div class="stat"><div class="stat-value" style="color:var(--accent)">' + sum.queued + '</div><div class="stat-label">Queued</div></div>' +
+    '<div class="stat"><div class="stat-value" style="color:var(--danger)">' + (sum.blocked || 0) + '</div><div class="stat-label">Blocked</div></div>' +
+    '<div class="stat"><div class="stat-value">' + sum.total_tasks + '</div><div class="stat-label">Total</div></div>' +
+    '<div class="stat"><div class="stat-value" style="color:var(--accent2)">' + sum.est_total_hours + 'h</div><div class="stat-label">Est Total</div></div>';
+
+  var grid = document.getElementById('wave-grid');
+  wave.queue.forEach(function(t) {
+    var blockedHtml = t.blocked_by.length
+      ? '<span class="wave-blocked-label">blocked by ' + t.blocked_by.join(', ') + '</span>'
+      : '';
+    var card = document.createElement('div');
+    card.className = 'wave-card';
+    card.innerHTML =
+      '<div class="wave-card-header">' +
+        '<span class="wave-id">' + t.id + '</span>' +
+        '<span class="wave-project">' + t.project_name + '</span>' +
+      '</div>' +
+      '<div class="wave-title">' + t.title + '</div>' +
+      '<div class="wave-desc">' + t.description + '</div>' +
+      '<div class="wave-meta">' +
+        '<span class="wave-status ' + t.status + '">' + t.status + '</span>' +
+        '<span class="wave-priority ' + t.priority + '">' + t.priority + '</span>' +
+        blockedHtml +
+        '<span class="wave-effort">' + t.est_effort + '</span>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
+
+function renderAutoStatus(autoList) {
+  var grid = document.getElementById('auto-grid');
+  autoList.forEach(function(a) {
+    var card = document.createElement('div');
+    card.className = 'auto-card';
+    card.innerHTML =
+      '<div class="auto-card-header">' +
+        '<span class="auto-name">' + a.name + '</span>' +
+        '<span class="auto-type">' + a.type + '</span>' +
+        '<span class="auto-status-dot ' + a.status + '"></span>' +
+      '</div>' +
+      '<div class="auto-desc">' + a.desc + '</div>';
+    grid.appendChild(card);
+  });
+
+  var active = autoList.filter(function(a) { return a.status === 'active' || a.status === 'new'; }).length;
+  var pct = Math.round((active / autoList.length) * 100);
+  var barHtml =
+    '<div class="auto-coverage">' +
+      '<div class="auto-coverage-label">Overall Automation Coverage</div>' +
+      '<div class="coverage-bar-bg"><div class="coverage-bar-fill" style="width:' + pct + '%"></div></div>' +
+      '<div class="coverage-pct">' + pct + '%</div>' +
+    '</div>';
+  grid.insertAdjacentHTML('beforeend', barHtml);
+}
+
+function init() {
+  renderDashboard(embeddedData);
+  renderWave8(embeddedWave8);
+  renderWaveQueue(embeddedWave);
+  renderAutoStatus(embeddedAuto);
+}
+
+init();
+</script>
+</body>
+</html>

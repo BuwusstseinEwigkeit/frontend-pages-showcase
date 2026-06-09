@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML 模板画廊 — 工程输出规范</title>
+<style>
+  :root {
+    --font-sans: -apple-system, "Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif;
+    --font-mono: "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
+    --radius-sm: 2px;
+    --radius-md: 4px;
+    --radius-lg: 6px;
+    --radius-max: 8px;
+    --color-bg: #f8f9fa;
+    --color-surface: #ffffff;
+    --color-border: #e0e0e0;
+    --color-text: #1a1a1a;
+    --color-text-secondary: #666;
+    --color-accent: #2563eb;
+    --color-accent-hover: #1d4ed8;
+    --color-success: #16a34a;
+    --color-warning: #d97706;
+    --color-danger: #dc2626;
+    --color-info: #0891b2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:var(--font-sans);
+    font-size:0.9375rem;
+    line-height:1.6;
+    color:var(--color-text);
+    background:var(--color-bg);
+  }
+  /* topbar */
+  .topbar{
+    position:sticky;top:0;z-index:100;
+    display:flex;align-items:center;justify-content:space-between;
+    height:44px;padding:0 16px;
+    background:var(--color-surface);
+    border-bottom:1px solid var(--color-border);
+  }
+  .topbar-title{font-size:0.875rem;font-weight:700;letter-spacing:0.02em;}
+  .topbar-status{font-size:0.8125rem;color:var(--color-text-secondary);}
+  /* nav tabs */
+  .tabs{
+    display:flex;gap:0;
+    background:var(--color-surface);
+    border-bottom:1px solid var(--color-border);
+    position:sticky;top:44px;z-index:99;
+    overflow-x:auto;
+  }
+  .tab{
+    flex-shrink:0;
+    padding:10px 18px;
+    font-size:0.8125rem;
+    font-weight:500;
+    cursor:pointer;
+    border:none;
+    background:none;
+    color:var(--color-text-secondary);
+    border-bottom:2px solid transparent;
+    transition:color .15s,border-color .15s;
+    white-space:nowrap;
+  }
+  .tab:hover{color:var(--color-text);}
+  .tab.active{color:var(--color-accent);border-bottom-color:var(--color-accent);font-weight:600;}
+  /* layout */
+  .content{max-width:1200px;margin:0 auto;padding:16px;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  /* section heading */
+  .section-head{
+    font-size:1.1rem;font-weight:700;margin:20px 0 12px;
+    padding-bottom:6px;border-bottom:1px solid var(--color-border);
+  }
+  /* preview card */
+  .preview-grid{display:grid;grid-template-columns:1fr;gap:16px;margin-bottom:24px;}
+  @media(min-width:768px){.preview-grid{grid-template-columns:repeat(2,1fr);}}
+  .preview-card{
+    background:var(--color-surface);border:1px solid var(--color-border);
+    border-radius:var(--radius-lg);overflow:hidden;
+  }
+  .preview-card-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:10px 14px;border-bottom:1px solid var(--color-border);
+    font-size:0.8125rem;font-weight:600;color:var(--color-text-secondary);
+    text-transform:uppercase;letter-spacing:0.04em;
+  }
+  .preview-card-body{padding:14px;}
+  .preview-iframe{width:100%;height:340px;border:none;border-radius:var(--radius-sm);}
+  .preview-link{font-size:0.8125rem;color:var(--color-accent);text-decoration:none;}
+  .preview-link:hover{text-decoration:underline;}
+  /* snippet list */
+  .snippet-list{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:24px;}
+  @media(min-width:640px){.snippet-list{grid-template-columns:repeat(2,1fr);}}
+  @media(min-width:1024px){.snippet-list{grid-template-columns:repeat(3,1fr);}}
+  .snippet-card{
+    background:var(--color-surface);border:1px solid var(--color-border);
+    border-radius:var(--radius-md);overflow:hidden;display:flex;flex-direction:column;
+  }
+  .snippet-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px;border-bottom:1px solid var(--color-border);
+    background:var(--color-bg);
+  }
+  .snippet-title{font-size:0.8125rem;font-weight:600;}
+  .snippet-cat{
+    font-size:0.6875rem;padding:2px 6px;
+    border-radius:var(--radius-sm);font-weight:500;
+  }
+  .cat-console{background:#dcfce7;color:#15803d;}
+  .cat-presentation{background:#e0e7ff;color:#3730a3;}
+  .cat-common{background:#cffafe;color:#155e75;}
+  .snippet-desc{font-size:0.75rem;color:var(--color-text-secondary);padding:8px 12px 4px;}
+  .snippet-code-wrap{
+    position:relative;flex:1;
+    max-height:200px;overflow:auto;
+    background:#1e1e2e;color:#cdd6f4;
+    font-family:var(--font-mono);font-size:0.75rem;
+    line-height:1.65;padding:10px 12px;
+  }
+  .snippet-code-wrap code{white-space:pre;}
+  .copy-btn{
+    position:absolute;top:6px;right:6px;
+    height:26px;padding:0 10px;
+    font-size:0.6875rem;font-weight:500;
+    border:1px solid #444;border-radius:var(--radius-sm);
+    background:#333;color:#ccc;cursor:pointer;
+    transition:background .15s;
+  }
+  .copy-btn:hover{background:#555;}
+  .copy-btn.copied{background:var(--color-success);border-color:var(--color-success);color:#fff;}
+  /* checklist */
+  .checklist{
+    background:var(--color-surface);border:1px solid var(--color-border);
+    border-radius:var(--radius-md);padding:16px;margin-bottom:24px;
+  }
+  .checklist h3{font-size:1rem;font-weight:700;margin-bottom:10px;}
+  .cl-row{
+    display:flex;align-items:flex-start;gap:10px;
+    padding:8px 0;border-bottom:1px solid var(--color-border);
+    font-size:0.875rem;
+  }
+  .cl-row:last-child{border-bottom:none;}
+  .cl-id{
+    flex-shrink:0;font-family:var(--font-mono);font-size:0.75rem;font-weight:700;
+    background:var(--color-bg);padding:2px 8px;border-radius:var(--radius-sm);
+    color:var(--color-accent);
+  }
+  .cl-rule{flex:1;}
+  .cl-status{
+    flex-shrink:0;width:24px;height:24px;display:flex;align-items:center;justify-content:center;
+    border-radius:var(--radius-sm);font-size:0.75rem;font-weight:700;
+  }
+  .cl-pass{background:#dcfce7;color:#15803d;}
+  .cl-fail{background:#fee2e2;color:#991b1b;}
+  /* anti-pattern */
+  .anti-list{margin-bottom:24px;}
+  .anti-item{
+    background:var(--color-surface);border:1px solid var(--color-border);
+    border-left:3px solid var(--color-danger);
+    border-radius:var(--radius-md);padding:12px 14px;margin-bottom:10px;
+  }
+  .anti-item h4{font-size:0.875rem;font-weight:600;color:var(--color-danger);margin-bottom:6px;}
+  .anti-item pre{
+    font-family:var(--font-mono);font-size:0.75rem;line-height:1.6;
+    background:#1e1e2e;color:#f38ba8;padding:8px 10px;border-radius:var(--radius-sm);
+    overflow-x:auto;margin-top:6px;
+  }
+  .anti-item p{font-size:0.8125rem;color:var(--color-text-secondary);margin-top:6px;}
+  /* compare table */
+  .compare-wrap{overflow-x:auto;margin-bottom:24px;}
+  .compare{
+    width:100%;border-collapse:collapse;font-size:0.8125rem;
+    background:var(--color-surface);border:1px solid var(--color-border);
+    border-radius:var(--radius-md);overflow:hidden;
+  }
+  .compare th,.compare td{
+    padding:10px 12px;text-align:left;border-bottom:1px solid var(--color-border);
+    vertical-align:top;
+  }
+  .compare th{
+    background:var(--color-bg);font-weight:600;
+    font-size:0.75rem;text-transform:uppercase;letter-spacing:0.04em;
+    color:var(--color-text-secondary);
+  }
+  .compare td:first-child{font-weight:500;color:var(--color-text-secondary);white-space:nowrap;}
+  /* tag */
+  .tag{
+    display:inline-block;padding:2px 8px;font-size:0.75rem;font-weight:500;
+    border-radius:var(--radius-sm);line-height:1.6;
+  }
+  .tag-console{background:#dcfce7;color:#15803d;}
+  .tag-presenter{background:#e0e7ff;color:#3730a3;}
+  /* toast */
+  .toast{
+    position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-10px);
+    background:var(--color-accent);color:#fff;
+    padding:8px 20px;border-radius:var(--radius-md);
+    font-size:0.8125rem;opacity:0;
+    transition:opacity .2s,transform .2s;pointer-events:none;z-index:999;
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  /* footer */
+  .footer{text-align:center;padding:20px 16px;font-size:0.75rem;color:var(--color-text-secondary);}
+  /* scrollbar */
+  ::-webkit-scrollbar{width:6px;height:6px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:#ccc;border-radius:3px;}
+</style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<!-- topbar -->
+<header class="topbar">
+  <span class="topbar-title">HTML 模板画廊</span>
+  <span class="topbar-status">v1.0 — 基于 HTML_DESIGN_RULES.md</span>
+</header>
+
+<!-- tabs -->
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-tab="previews">模板预览</button>
+  <button class="tab" data-tab="snippets">代码片段</button>
+  <button class="tab" data-tab="checklist">红线 Checklist</button>
+  <button class="tab" data-tab="anti">常见反例</button>
+  <button class="tab" data-tab="compare">模板对比</button>
+</nav>
+
+<div class="content">
+
+<!-- ====== PREVIEWS ====== -->
+<div class="panel active" id="panel-previews">
+  <h2 class="section-head">模板预览</h2>
+  <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:14px;">
+    点击文件名可跳转到完整模板。预览为嵌入 iframe，实际效果与双击打开一致。
+  </p>
+  <div class="preview-grid">
+    <div class="preview-card">
+      <div class="preview-card-head">
+        <span><span class="tag tag-console">控制台</span> control_console_template</span>
+        <a class="preview-link" href="../control_console_template.html" target="_blank">打开 ↗</a>
+      </div>
+      <div class="preview-card-body" style="padding:0;">
+        <iframe class="preview-iframe" src="../control_console_template.html" loading="lazy"></iframe>
+      </div>
+    </div>
+    <div class="preview-card">
+      <div class="preview-card-head">
+        <span><span class="tag tag-presenter">演示</span> presentation_template</span>
+        <a class="preview-link" href="../presentation_template.html" target="_blank">打开 ↗</a>
+      </div>
+      <div class="preview-card-body" style="padding:0;">
+        <iframe class="preview-iframe" src="../presentation_template.html" loading="lazy"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== SNIPPETS ====== -->
+<div class="panel" id="panel-snippets">
+  <h2 class="section-head">可复制代码片段</h2>
+  <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:14px;">
+    点击右上角"复制"按钮将代码复制到剪贴板，直接粘贴到你的 HTML 文件中。
+  </p>
+  <div class="snippet-list" id="snippetList"></div>
+</div>
+
+<!-- ====== CHECKLIST ====== -->
+<div class="panel" id="panel-checklist">
+  <h2 class="section-head">红线验收 Checklist</h2>
+  <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:14px;">
+    生成任何 HTML 文件后，逐条检查以下红线。本画廊所有文件均已通过。
+  </p>
+  <div class="checklist">
+    <h3>红线规则</h3>
+    <div class="cl-row">
+      <span class="cl-id">R1</span>
+      <span class="cl-rule">禁止外链资源 — 不得引用 CDN / Google Fonts / 外部 JS/CSS，字体用系统栈</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id">R2</span>
+      <span class="cl-rule">圆角 ≤ 8px — border-radius 最大 8px，禁止 12px 及以上</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id">R3</span>
+      <span class="cl-rule">不用泛紫渐变 — 禁止 linear-gradient 中出现紫–蓝–粉过渡色</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id">R4</span>
+      <span class="cl-rule">不用装饰 blob — 禁止绝对定位 + 大尺寸 + blur 做背景装饰</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id">R5</span>
+      <span class="cl-rule">单文件交付 — 所有 CSS/JS 内联，可直接双击打开</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id">R6</span>
+      <span class="cl-rule">中文默认 — lang="zh-CN"，所有界面文本为中文</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+  </div>
+  <div class="checklist">
+    <h3>通用检查项</h3>
+    <div class="cl-row">
+      <span class="cl-id">A1</span>
+      <span class="cl-rule">响应式：375px 宽度无横向滚动</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id">A2</span>
+      <span class="cl-rule">可访问性：有 lang 属性，表单控件有关联 label</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id">A3</span>
+      <span class="cl-rule">无 alert()、confirm()、prompt() 弹窗</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id">A4</span>
+      <span class="cl-rule">无未使用的全局变量或空函数</span>
+      <span class="cl-status cl-pass">✓</span>
+    </div>
+  </div>
+</div>
+
+<!-- ====== ANTI-PATTERNS ====== -->
+<div class="panel" id="panel-anti">
+  <h2 class="section-head">常见反例</h2>
+  <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:14px;">
+    以下是生成 HTML 时最常见的违规写法，对照红线逐条避免。
+  </p>
+  <div class="anti-list">
+    <div class="anti-item">
+      <h4>R1 外链字体 — 最常见违规</h4>
+      <pre>&lt;link href="https://fonts.googleapis.com/css2?family=Inter" rel="stylesheet"&gt;
+&lt;link href="https://cdn.jsdelivr.net/npm/..." rel="stylesheet"&gt;</pre>
+      <p>修复：改用系统字体栈 <code>-apple-system, "Microsoft YaHei", sans-serif</code>，不引用任何外部资源。</p>
+    </div>
+    <div class="anti-item">
+      <h4>R2 圆角过大 — 视觉失控</h4>
+      <pre>border-radius: 16px;
+border-radius: 9999px;</pre>
+      <p>修复：最大 8px。按钮 4px，卡片 4–6px，头像等圆形元素除外（可用 9999px 但需注明是圆形头像场景）。</p>
+    </div>
+    <div class="anti-item">
+      <h4>R3 紫色渐变 — 泛滥审美</h4>
+      <pre>background: linear-gradient(135deg, #667eea, #764ba2);
+background: linear-gradient(to right, #a855f7, #ec4899);</pre>
+      <p>修复：用纯色或蓝/青/灰等中性色系，保持信息优先。</p>
+    </div>
+    <div class="anti-item">
+      <h4>R4 装饰 blob — 增加视觉噪音</h4>
+      <pre>.blob {
+  position: absolute;
+  width: 300px; height: 300px;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.3;
+}</pre>
+      <p>修复：删除所有装饰性背景元素。页面信息密度优先，不需要"艺术感"填充。</p>
+    </div>
+    <div class="anti-item">
+      <h4>R1 外部 JS — 单文件原则</h4>
+      <pre>&lt;script src="https://cdn.jsdelivr.net/npm/vue@3"&gt;&lt;/script&gt;
+&lt;script src="https://unpkg.com/react@18"&gt;&lt;/script&gt;</pre>
+      <p>修复：所有 JS 内联在 &lt;script&gt; 标签中，纯原生实现，不依赖任何框架。</p>
+    </div>
+    <div class="anti-item">
+      <h4>A3 alert 弹窗 — 低级交互</h4>
+      <pre>function copy() {
+  alert('已复制到剪贴板');
+}</pre>
+      <p>修复：用 navigator.clipboard.writeText + 自定义 toast 提示，不用浏览器原生弹窗。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ====== COMPARE ====== -->
+<div class="panel" id="panel-compare">
+  <h2 class="section-head">控制台模板 vs 演示模板</h2>
+  <p style="font-size:0.875rem;color:var(--color-text-secondary);margin-bottom:14px;">
+    两套模板面向不同场景，以下是关键维度对比。
+  </p>
+  <div class="compare-wrap">
+    <table class="compare">
+      <thead>
+        <tr>
+          <th>维度</th>
+          <th><span class="tag tag-console">控制台模板</span></th>
+          <th><span class="tag tag-presenter">演示模板</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>场景</td>
+          <td>工程监控、运维仪表盘、数据看板</td>
+          <td>汇报演示、周报、可编辑幻灯片</td>
+        </tr>
+        <tr>
+          <td>背景色</td>
+          <td>浅灰 #f1f3f5 — 高信息密度可读</td>
+          <td>深色 #0f172a — 投影沉浸感</td>
+        </tr>
+        <tr>
+          <td>布局</td>
+          <td>CSS Grid 3列，卡片跨列(span-2/3)</td>
+          <td>单页 section 居中，全屏覆盖</td>
+        </tr>
+        <tr>
+          <td>顶栏</td>
+          <td>44px sticky topbar，状态指示灯+实时时钟</td>
+          <td>无顶栏，全屏沉浸</td>
+        </tr>
+        <tr>
+          <td>底部导航</td>
+          <td>无（信息密度优先）</td>
+          <td>48px fixed 底栏，上一页/下一页/页码/复制</td>
+        </tr>
+        <tr>
+          <td>可编辑</td>
+          <td>不可编辑（展示数据）</td>
+          <td>contenteditable="true"，hover 显示虚线边框</td>
+        </tr>
+        <tr>
+          <td>数字字体</td>
+          <td>monospace，语义色（绿/黄/红）</td>
+          <td>sans-serif，中性色</td>
+        </tr>
+        <tr>
+          <td>典型组件</td>
+          <td>指标格子、进度条、键值表、日志面板、标签</td>
+          <td>标题、列表、代码块、页码水印</td>
+        </tr>
+        <tr>
+          <td>交互</td>
+          <td>&lt;details/&gt; 折叠、按钮组、实时日志滚动</td>
+          <td>键盘←→导航、圆点指示器、复制页面HTML</td>
+        </tr>
+        <tr>
+          <td>响应式</td>
+          <td>桌面3列 → 平板2列 → 手机1列</td>
+          <td>标题字号随屏幕缩小，小屏隐藏编辑提示</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3 style="font-size:1rem;font-weight:600;margin:16px 0 10px;">选型建议</h3>
+  <div class="checklist">
+    <div class="cl-row">
+      <span class="cl-id" style="background:#dcfce7;">控制台</span>
+      <span class="cl-rule">需要展示多组实时数据、状态、日志，信息密度是第一优先级</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id" style="background:#e0e7ff;color:#3730a3;">演示</span>
+      <span class="cl-rule">需要逐页展示内容，内容可编辑，面向投屏/会议场景</span>
+    </div>
+    <div class="cl-row">
+      <span class="cl-id" style="background:#cffafe;color:#155e75;">混合</span>
+      <span class="cl-rule">可从两套模板各取组件组合，统一使用 CSS 变量保证风格一致</span>
+    </div>
+  </div>
+</div>
+
+</div><!-- /content -->
+
+<footer class="footer">
+  模板画廊 · 基于 HTML_DESIGN_RULES.md v1.0 · 所有文件可 file:// 直接打开
+</footer>
+
+<script>
+// === Tabs ===
+var tabs = document.getElementById('tabs');
+tabs.addEventListener('click', function(e) {
+  var btn = e.target.closest('.tab');
+  if (!btn) return;
+  var id = btn.getAttribute('data-tab');
+  tabs.querySelectorAll('.tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+  document.getElementById('panel-' + id).classList.add('active');
+});
+
+// === Snippets ===
+var SNIPPETS = [
+  {id:"console-css-vars",title:"控制台 — CSS 变量",cat:"console",desc:"根变量，字体栈、圆角、语义色",code:":root {\n  --font-sans: -apple-system, \"Microsoft YaHei\", \"PingFang SC\", \"Helvetica Neue\", sans-serif;\n  --font-mono: \"Cascadia Code\", \"Fira Code\", \"JetBrains Mono\", Consolas, monospace;\n  --radius-sm: 2px;\n  --radius-md: 4px;\n  --radius-lg: 6px;\n  --radius-max: 8px;\n  --color-bg: #f1f3f5;\n  --color-surface: #ffffff;\n  --color-border: #dee2e6;\n  --color-text: #1a1a1a;\n  --color-text-secondary: #6c757d;\n  --color-accent: #2563eb;\n  --color-success: #16a34a;\n  --color-warning: #d97706;\n  --color-danger: #dc2626;\n  --color-info: #0891b2;\n}"},
+  {id:"console-topbar",title:"控制台 — 顶栏",cat:"console",desc:"40px sticky 顶栏，状态指示灯+时钟",code:"<header class=\"topbar\">\n  <span class=\"topbar-title\">工程控制台</span>\n  <div class=\"topbar-status\">\n    <span><span class=\"status-dot\"></span> 运行中</span>\n    <span id=\"clock\"></span>\n  </div>\n</header>"},
+  {id:"console-card",title:"控制台 — 卡片",cat:"console",desc:"信息卡片，支持 span-2/3 跨列",code:"<div class=\"card\">\n  <div class=\"card-header\">\n    <span>卡片标题</span>\n    <span class=\"tag tag-success\">正常</span>\n  </div>\n  <div class=\"card-body\">内容区</div>\n</div>"},
+  {id:"console-metric-grid",title:"控制台 — 指标网格",cat:"console",desc:"等宽指标格子，monospace 数字 + 语义色",code:"<div class=\"metric-grid\">\n  <div class=\"metric\">\n    <div class=\"metric-value ok\">99.7%</div>\n    <div class=\"metric-label\">可用率</div>\n  </div>\n  <div class=\"metric\">\n    <div class=\"metric-value warn\">3</div>\n    <div class=\"metric-label\">活跃告警</div>\n  </div>\n</div>"},
+  {id:"console-kv-table",title:"控制台 — 键值表",cat:"console",desc:"紧凑键值对展示",code:"<table class=\"kv-table\">\n  <tr><td>环境</td><td>production</td></tr>\n  <tr><td>版本</td><td>v2.14.3</td></tr>\n  <tr><td>区域</td><td>ap-east-1</td></tr>\n</table>"},
+  {id:"console-progress-bar",title:"控制台 — 进度条",cat:"console",desc:"水平进度条，标签+百分比",code:"<div class=\"progress-row\">\n  <span class=\"progress-label\">API 网关</span>\n  <div class=\"progress-bar\"><div class=\"progress-fill ok\" style=\"width:98%\"></div></div>\n  <span class=\"progress-num\">98%</span>\n</div>"},
+  {id:"console-log",title:"控制台 — 实时日志",cat:"console",desc:"深色背景日志面板，monospace 滚动",code:"<div class=\"log\" id=\"log\">\n  <div><span class=\"ts\">03:12:01</span> <span class=\"ok\">[INFO]</span>  服务启动完成</div>\n  <div><span class=\"ts\">03:12:15</span> <span class=\"warn\">[WARN]</span> 队列积压</div>\n</div>"},
+  {id:"console-tags",title:"控制台 — 标签",cat:"console",desc:"语义色标签，状态标记",code:"<span class=\"tag tag-success\">正常</span>\n<span class=\"tag tag-warning\">警告</span>\n<span class=\"tag tag-danger\">异常</span>\n<span class=\"tag tag-info\">信息</span>"},
+  {id:"console-grid-layout",title:"控制台 — Grid 布局",cat:"console",desc:"响应式网格，卡片跨列",code:".main {\n  display: grid;\n  grid-template-columns: 1fr;\n  gap: 12px;\n  padding: 12px;\n  max-width: 1400px;\n  margin: 0 auto;\n}\n@media (min-width: 1024px) {\n  .main { grid-template-columns: repeat(3, 1fr); }\n  .card.span-2 { grid-column: span 2; }\n  .card.span-3 { grid-column: span 3; }\n}"},
+  {id:"presentation-css-vars",title:"演示 — CSS 变量",cat:"presentation",desc:"深色背景根变量",code:":root {\n  --font-sans: -apple-system, \"Microsoft YaHei\", \"PingFang SC\", sans-serif;\n  --font-mono: \"Cascadia Code\", \"Fira Code\", Consolas, monospace;\n  --radius-md: 4px;\n  --radius-lg: 6px;\n  --radius-max: 8px;\n  --color-bg: #0f172a;\n  --color-surface: #1e293b;\n  --color-border: #334155;\n  --color-text: #f1f5f9;\n  --color-text-secondary: #94a3b8;\n  --color-accent: #3b82f6;\n  --color-accent-hover: #2563eb;\n  --slide-max-w: 960px;\n}"},
+  {id:"presentation-slide",title:"演示 — 幻灯片结构",cat:"presentation",desc:"单页 section + contenteditable",code:"<section class=\"slide active\" data-idx=\"0\">\n  <div class=\"edit-hint\">点击任意文字可编辑</div>\n  <h1 contenteditable=\"true\">标题</h1>\n  <p contenteditable=\"true\">正文内容</p>\n  <span class=\"slide-num\">1</span>\n</section>"},
+  {id:"presentation-nav",title:"演示 — 底部导航",cat:"presentation",desc:"fixed 底栏，页码指示器",code:"<nav class=\"nav\">\n  <button class=\"nav-btn\" onclick=\"go(-1)\">上一页</button>\n  <div class=\"dots\" id=\"dots\"></div>\n  <span class=\"nav-page\" id=\"pageInfo\">1 / 4</span>\n  <button class=\"nav-btn primary\" onclick=\"go(1)\">下一页</button>\n  <button class=\"nav-btn\" onclick=\"copyPage()\">复制</button>\n</nav>"},
+  {id:"presentation-editable",title:"演示 — 可编辑样式",cat:"presentation",desc:"contenteditable hover/focus 视觉提示",code:"[contenteditable] {\n  outline: none;\n  border-radius: 4px;\n  transition: box-shadow 0.15s ease;\n  padding: 4px 6px;\n}\n[contenteditable]:hover {\n  box-shadow: inset 0 0 0 1.5px rgba(59,130,246,0.35);\n}\n[contenteditable]:focus {\n  box-shadow: inset 0 0 0 2px var(--color-accent);\n}"},
+  {id:"common-font-stack",title:"通用 — 系统字体栈",cat:"common",desc:"sans + mono 无外部依赖",code:":root {\n  --font-sans: -apple-system, \"Microsoft YaHei\", \"PingFang SC\", \"Helvetica Neue\", sans-serif;\n  --font-mono: \"Cascadia Code\", \"Fira Code\", \"JetBrains Mono\", Consolas, monospace;\n}"},
+  {id:"common-btn",title:"通用 — 按钮组件",cat:"common",desc:"默认/主要/危险三种按钮",code:"<button class=\"btn\">默认</button>\n<button class=\"btn btn-primary\">主要</button>\n<button class=\"btn btn-danger\">危险</button>"}
+];
+
+var catLabels = {console:'控制台',presentation:'演示',common:'通用'};
+var catCls = {console:'cat-console',presentation:'cat-presentation',common:'cat-common'};
+
+var list = document.getElementById('snippetList');
+SNIPPETS.forEach(function(s) {
+  var card = document.createElement('div');
+  card.className = 'snippet-card';
+  card.innerHTML =
+    '<div class="snippet-head">' +
+      '<span class="snippet-title">' + escHtml(s.title) + '</span>' +
+      '<span class="snippet-cat ' + catCls[s.cat] + '">' + catLabels[s.cat] + '</span>' +
+    '</div>' +
+    '<div class="snippet-desc">' + escHtml(s.desc) + '</div>' +
+    '<div class="snippet-code-wrap">' +
+      '<button class="copy-btn" data-code="' + escAttr(s.code) + '">复制</button>' +
+      '<code>' + escHtml(s.code) + '</code>' +
+    '</div>';
+  list.appendChild(card);
+});
+
+// === Copy ===
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('.copy-btn');
+  if (!btn) return;
+  var code = btn.getAttribute('data-code');
+  copyText(code, function(ok) {
+    if (ok) {
+      btn.textContent = '已复制';
+      btn.classList.add('copied');
+      setTimeout(function() { btn.textContent = '复制'; btn.classList.remove('copied'); }, 1500);
+    }
+  });
+});
+
+function copyText(text, cb) {
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function() { cb(true); }).catch(function() { fallbackCopy(text, cb); });
+  } else {
+    fallbackCopy(text, cb);
+  }
+}
+function fallbackCopy(text, cb) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;left:-9999px;top:-9999px;';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); cb(true); } catch(e) { cb(false); }
+  document.body.removeChild(ta);
+}
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function escAttr(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
