@@ -178,8 +178,8 @@
   </header>
   <main>
     <section class="stats" aria-label="Publish summary">
-      <div class="stat"><strong>7</strong><span>已发布入口</span></div>
-      <div class="stat"><strong>7</strong><span>默认跳过类别</span></div>
+      <div class="stat"><strong>6</strong><span>已发布入口</span></div>
+      <div class="stat"><strong>8</strong><span>默认跳过类别</span></div>
       <div class="stat"><strong>0</strong><span>原项目文件被修改</span></div>
     </section>
     <section class="grid" aria-label="Published pages">
@@ -231,14 +231,6 @@
           </div>
           <a class="open-link" href="sites/cc-cluster-control-center/" aria-label="Open CC Cluster Control Center">打开</a>
         </article>
-        <article class="project-card">
-          <div>
-            <p class="eyebrow">单文件 HTML</p>
-            <h2>CC Cluster Run Report</h2>
-            <p>独立静态报告页。</p>
-          </div>
-          <a class="open-link" href="sites/cluster-run-report/" aria-label="Open CC Cluster Run Report">打开</a>
-        </article>
 
     </section>
     <section class="audit">
@@ -254,6 +246,7 @@
       <tr><td>source/repos/skill-manager/index.html + dist</td><td>根入口会跳转到本机开发服务器；dist 静态版会请求后端 API，未做 mock 前不公开。</td></tr>
       <tr><td>Documents/Codex/.../paper-starter/paper.html</td><td>论文模板带 Quarto 依赖目录且可能是草稿，默认不公开。</td></tr>
       <tr><td>Documents/Codex/.../project-forge/output/*.html</td><td>多处页面含本机绝对路径、内部流程文字或 secret/token/auth 演示内容，默认不公开。</td></tr>
+      <tr><td>Documents/Codex/.../cluster-run-report/index.html</td><td>页面包含本机绝对路径和原始运行报告内容，且有乱码，默认不公开。</td></tr>
 
         </tbody>
       </table>
