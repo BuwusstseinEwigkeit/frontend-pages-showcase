@@ -6,9 +6,10 @@
   <title>外来物种哨兵 | 公众参与式生态线索系统</title>
   <meta name="description" content="外来物种哨兵：公众参与式外来入侵物种上报与审核系统。微信小程序 + Node.js/Express + SQLite 架构，把野外偶然发现转化为可审核、可追踪、可公开的生态数据资产。" />
   <meta property="og:title" content="外来物种哨兵 | 公众参与式生态线索系统">
-  <meta property="og:description" content="把一次野外发现，变成可审核、可追踪、可公开的数据闭环。20个物种知识库、12+小程序页面、73个全覆盖测试。">
+  <meta property="og:description" content="把一次野外发现，变成可审核、可追踪、可公开的数据闭环。20个物种知识库、12+小程序页面、73+ 个自动化测试。">
   <meta property="og:type" content="website">
-  <meta property="og:image" content="assets/sentinel-hero.webp">
+  <meta property="og:image" content="https://buwusstseinewigkeit.github.io/frontend-pages-showcase/assets/sentinel-hero.webp">
+  <meta property="og:url" content="https://buwusstseinewigkeit.github.io/frontend-pages-showcase/">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23124633'/%3E%3Ctext x='32' y='39' text-anchor='middle' font-size='22' font-family='Georgia, serif' font-weight='700' fill='%23ffffff'%3EIS%3C/text%3E%3C/svg%3E">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -365,7 +366,7 @@
     /* HERO 区域 */
     .hero {
       position: relative;
-      padding: 130px 0 72px;
+      padding: 118px 0 64px;
       min-height: calc(100vh - 40px);
       display: flex;
       flex-direction: column;
@@ -589,7 +590,7 @@
 
     /* 物种横幅条 */
     .hero-species-band {
-      margin-top: 44px;
+      margin-top: 36px;
       position: relative;
       z-index: 2;
     }
@@ -614,7 +615,7 @@
       border-radius: var(--radius-md);
       overflow: hidden;
       border: 1px solid var(--line);
-      background: var(--warm);
+      background: var(--moss-light);
       box-shadow: var(--shadow-sm);
       transition: all 0.25s ease;
     }
@@ -846,8 +847,10 @@
       justify-content: space-between;
       align-items: center;
     }
+    .mini-card-header > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
     .mini-card-header span { font-size: 11px; opacity: 0.8; }
-    .mini-card-header strong { font-size: 14px; }
+    .mini-card-header strong { font-size: 14px; line-height: 1.3; }
+    .mini-card-header .mini-app-badge { flex-shrink: 0; align-self: flex-start; }
     .mini-app-item {
       display: flex;
       align-items: center;
@@ -864,6 +867,7 @@
       border-radius: 8px;
       object-fit: cover;
       flex-shrink: 0;
+      background: var(--moss-light);
     }
     .mini-app-item div {
       flex-grow: 1;
@@ -937,7 +941,7 @@
       padding-top: 10px;
       border-top: 1px solid rgba(255, 255, 255, 0.08);
       font-size: 12px;
-      color: var(--moss);
+      color: #b9cf94;
       font-family: monospace;
     }
 
@@ -962,6 +966,7 @@
       overflow: hidden;
       aspect-ratio: 16 / 9;
       box-shadow: var(--shadow-md);
+      background: var(--moss-light);
     }
     .evidence-lead-img img {
       width: 100%;
@@ -1630,7 +1635,7 @@
     </div>
     <div class="mobile-drawer-footer">
       <span>微信原生小程序 + Express</span>
-      <span>73 个测试通过</span>
+      <span>73+ 自动化测试</span>
     </div>
   </div>
 
@@ -1683,7 +1688,7 @@
             <div class="instant-pill">
               <span class="instant-tag">真成果</span>
               <div class="instant-text">
-                20 物种 / 12+ 页面 / 73 测试
+                20 物种 / 12+ 页面 / 73+ 测试
                 <span>Azure API 稳定运行 · 全流程闭环</span>
               </div>
             </div>
@@ -1703,12 +1708,12 @@
 
           <!-- 真实标本浮动标签 -->
           <div class="specimen-tag specimen-tag-1">
-            <img src="assets/species-013.jpg" alt="红火蚁" width="26" height="26" loading="lazy">
+            <img src="assets/species-013.webp" alt="红火蚁" width="26" height="26" loading="lazy">
             <span>红火蚁</span>
-            <span class="specimen-badge-danger">极高危</span>
+            <span class="specimen-badge-danger">高风险</span>
           </div>
           <div class="specimen-tag specimen-tag-2">
-            <img src="assets/species-011.jpg" alt="薇甘菊" width="26" height="26" loading="lazy">
+            <img src="assets/species-011.webp" alt="薇甘菊" width="26" height="26" loading="lazy">
             <span>薇甘菊</span>
             <span class="specimen-badge-danger">高风险</span>
           </div>
@@ -1724,7 +1729,7 @@
               <span>小程序全功能矩阵</span>
             </div>
             <div class="stat-box">
-              <strong>73 个</strong>
+              <strong>73+ 个</strong>
               <span>全覆盖自动化测试</span>
             </div>
           </div>
@@ -1738,31 +1743,31 @@
         </div>
         <div class="species-band-grid">
           <div class="species-strip-tile">
-            <img src="assets/species-001.jpg" alt="加拿大一枝黄花" width="160" height="160" loading="lazy" decoding="async">
+            <img src="assets/species-001.webp" alt="加拿大一枝黄花" width="160" height="160" loading="eager" decoding="async">
             <span>加拿大一枝黄花</span>
           </div>
           <div class="species-strip-tile">
-            <img src="assets/species-002.jpg" alt="福寿螺" width="160" height="160" loading="lazy" decoding="async">
+            <img src="assets/species-002.webp" alt="福寿螺" width="160" height="160" loading="eager" decoding="async">
             <span>福寿螺</span>
           </div>
           <div class="species-strip-tile">
-            <img src="assets/species-003.jpg" alt="红耳龟" width="160" height="160" loading="lazy" decoding="async">
+            <img src="assets/species-003.webp" alt="红耳龟" width="160" height="160" loading="eager" decoding="async">
             <span>红耳龟</span>
           </div>
           <div class="species-strip-tile">
-            <img src="assets/species-004.jpg" alt="水葫芦" width="160" height="160" loading="lazy" decoding="async">
+            <img src="assets/species-004.webp" alt="水葫芦" width="160" height="160" loading="eager" decoding="async">
             <span>水葫芦</span>
           </div>
           <div class="species-strip-tile">
-            <img src="assets/species-005.jpg" alt="空心莲子草" width="160" height="160" loading="lazy" decoding="async">
+            <img src="assets/species-005.webp" alt="空心莲子草" width="160" height="160" loading="eager" decoding="async">
             <span>空心莲子草</span>
           </div>
           <div class="species-strip-tile">
-            <img src="assets/species-007.jpg" alt="克氏原螯虾" width="160" height="160" loading="lazy" decoding="async">
+            <img src="assets/species-007.webp" alt="克氏原螯虾" width="160" height="160" loading="eager" decoding="async">
             <span>克氏原螯虾</span>
           </div>
           <div class="species-strip-tile">
-            <img src="assets/species-016.jpg" alt="非洲大蜗牛" width="160" height="160" loading="lazy" decoding="async">
+            <img src="assets/species-016.webp" alt="非洲大蜗牛" width="160" height="160" loading="eager" decoding="async">
             <span>非洲大蜗牛</span>
           </div>
         </div>
@@ -1925,28 +1930,28 @@
                 <span class="mini-app-badge">已就绪</span>
               </div>
               <div class="mini-app-item">
-                <img src="assets/species-001.jpg" alt="加拿大一枝黄花" width="38" height="38" loading="lazy">
+                <img src="assets/species-001.webp" alt="加拿大一枝黄花" width="38" height="38" loading="lazy">
                 <div>
                   <strong>拍照快速识别</strong>
                   <span>匹配候选并自动提取 GPS 经纬度</span>
                 </div>
               </div>
               <div class="mini-app-item">
-                <img src="assets/sentinel-map-trust.webp" alt="附近记录地图" width="38" height="38" loading="lazy">
+                <img src="assets/sentinel-thumb-map-trust.webp" alt="附近记录地图" width="38" height="38" loading="lazy">
                 <div>
                   <strong>附近态势地图</strong>
                   <span>查看周边 5km 已核实外来入侵物种点位</span>
                 </div>
               </div>
               <div class="mini-app-item">
-                <img src="assets/sentinel-review-safety.webp" alt="审核台" width="38" height="38" loading="lazy">
+                <img src="assets/sentinel-thumb-review-safety.webp" alt="审核台" width="38" height="38" loading="lazy">
                 <div>
                   <strong>我的上报与审核</strong>
                   <span>线索流转状态跟踪、审核员反馈附言</span>
                 </div>
               </div>
               <div class="mini-app-item">
-                <img src="assets/badge-ecoguard.png" alt="生态卫士徽章" width="38" height="38" loading="lazy">
+                <img src="assets/badge-ecoguard.webp" alt="生态卫士徽章" width="38" height="38" loading="lazy">
                 <div>
                   <strong>积分中心与商城</strong>
                   <span>Eco Guard 徽章 · 每日上报配额提升</span>
@@ -2021,7 +2026,7 @@
         <div class="section-kicker">VISUAL EVIDENCE & SPECIMENS</div>
         <h2 class="section-title">视觉证据层：真实物种标本、徽章体系与可信边界。</h2>
         <p class="section-lead">
-          系统收录国内高关注度的 20 种外来入侵植物与动物。页面展示完全基于项目真实资产，突出物种生物学特征与危害事实。
+          系统收录国内高关注度的 20 种外来入侵物种，涵盖植物、鱼类、昆虫与检疫性病害。页面展示完全基于项目真实物种库资产，突出生物学特征与危害事实。
         </p>
 
         <div class="evidence-showcase">
@@ -2050,7 +2055,7 @@
           <div class="specimen-grid-20">
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-001.jpg" alt="加拿大一枝黄花" width="220" height="165" loading="lazy">
+                <img src="assets/species-001.webp" alt="加拿大一枝黄花" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-high">高风险</span>
               </div>
               <div class="specimen-info">
@@ -2062,7 +2067,7 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-002.jpg" alt="福寿螺" width="220" height="165" loading="lazy">
+                <img src="assets/species-002.webp" alt="福寿螺" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-high">高风险</span>
               </div>
               <div class="specimen-info">
@@ -2074,7 +2079,7 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-003.jpg" alt="红耳龟" width="220" height="165" loading="lazy">
+                <img src="assets/species-003.webp" alt="红耳龟" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-mid">中风险</span>
               </div>
               <div class="specimen-info">
@@ -2086,7 +2091,7 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-004.jpg" alt="水葫芦" width="220" height="165" loading="lazy">
+                <img src="assets/species-004.webp" alt="水葫芦" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-high">高风险</span>
               </div>
               <div class="specimen-info">
@@ -2098,7 +2103,7 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-005.jpg" alt="空心莲子草" width="220" height="165" loading="lazy">
+                <img src="assets/species-005.webp" alt="空心莲子草" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-high">高风险</span>
               </div>
               <div class="specimen-info">
@@ -2110,7 +2115,7 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-006.jpg" alt="互花米草" width="220" height="165" loading="lazy">
+                <img src="assets/species-006.webp" alt="互花米草" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-high">高风险</span>
               </div>
               <div class="specimen-info">
@@ -2122,7 +2127,7 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-007.jpg" alt="克氏原螯虾" width="220" height="165" loading="lazy">
+                <img src="assets/species-007.webp" alt="克氏原螯虾" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-mid">中风险</span>
               </div>
               <div class="specimen-info">
@@ -2134,7 +2139,7 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-008.jpg" alt="牛蛙" width="220" height="165" loading="lazy">
+                <img src="assets/species-008.webp" alt="牛蛙" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-mid">中风险</span>
               </div>
               <div class="specimen-info">
@@ -2146,19 +2151,19 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-009.jpg" alt="清道夫" width="220" height="165" loading="lazy">
-                <span class="specimen-risk-badge risk-high">高风险</span>
+                <img src="assets/species-009.webp" alt="豹纹翼甲鲶（清道夫）" width="220" height="165" loading="lazy">
+                <span class="specimen-risk-badge risk-mid">中风险</span>
               </div>
               <div class="specimen-info">
-                <strong>豹纹翼甲鲶 (清道夫)</strong>
-                <em>Hypostomus plecostomus</em>
-                <span>动物 · 吞食本土鱼卵</span>
+                <strong>豹纹翼甲鲶（清道夫）</strong>
+                <em>Pterygoplichthys pardalis</em>
+                <span>动物 · 破坏底栖生态与堤岸</span>
               </div>
             </article>
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-010.jpg" alt="豚草" width="220" height="165" loading="lazy">
+                <img src="assets/species-010.webp" alt="豚草" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-high">高风险</span>
               </div>
               <div class="specimen-info">
@@ -2170,7 +2175,7 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-011.jpg" alt="薇甘菊" width="220" height="165" loading="lazy">
+                <img src="assets/species-011.webp" alt="薇甘菊" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-high">高风险</span>
               </div>
               <div class="specimen-info">
@@ -2182,109 +2187,109 @@
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-012.jpg" alt="巴西龟" width="220" height="165" loading="lazy">
+                <img src="assets/species-012.webp" alt="巴西红耳龟" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-mid">中风险</span>
               </div>
               <div class="specimen-info">
                 <strong>巴西红耳龟</strong>
-                <em>Trachemys scripta</em>
-                <span>动物 · 基因污染本土龟</span>
+                <em>Trachemys scripta elegans</em>
+                <span>动物 · 弃养入水挤占本土龟资源</span>
               </div>
             </article>
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-013.jpg" alt="红火蚁" width="220" height="165" loading="lazy">
-                <span class="specimen-risk-badge risk-high" style="background: var(--danger)">极高危</span>
+                <img src="assets/species-013.webp" alt="红火蚁" width="220" height="165" loading="lazy">
+                <span class="specimen-risk-badge risk-high">高风险</span>
               </div>
               <div class="specimen-info">
                 <strong>红火蚁</strong>
                 <em>Solenopsis invicta</em>
-                <span>昆虫 · 具强毒性伤人伤畜</span>
+                <span>昆虫 · 攻击性强 · 叮咬可致休克</span>
               </div>
             </article>
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-014.jpg" alt="齐氏罗非鱼" width="220" height="165" loading="lazy">
+                <img src="assets/species-014.webp" alt="松材线虫" width="220" height="165" loading="lazy">
+                <span class="specimen-risk-badge risk-high">高风险</span>
+              </div>
+              <div class="specimen-info">
+                <strong>松材线虫</strong>
+                <em>Bursaphelenchus xylophilus</em>
+                <span>植物病害 · 经天牛传播致松树枯死</span>
+              </div>
+            </article>
+
+            <article class="specimen-cell">
+              <div class="specimen-thumb">
+                <img src="assets/species-015.webp" alt="美国白蛾" width="220" height="165" loading="lazy">
+                <span class="specimen-risk-badge risk-high">高风险</span>
+              </div>
+              <div class="specimen-info">
+                <strong>美国白蛾</strong>
+                <em>Hyphantria cunea</em>
+                <span>昆虫 · 幼虫结网暴食 300+ 种植物</span>
+              </div>
+            </article>
+
+            <article class="specimen-cell">
+              <div class="specimen-thumb">
+                <img src="assets/species-016.webp" alt="非洲大蜗牛" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-mid">中风险</span>
               </div>
               <div class="specimen-info">
-                <strong>齐氏罗非鱼</strong>
-                <em>Coptodon zillii</em>
-                <span>动物 · 占夺本土水生生态位</span>
-              </div>
-            </article>
-
-            <article class="specimen-cell">
-              <div class="specimen-thumb">
-                <img src="assets/species-015.jpg" alt="凤眼莲" width="220" height="165" loading="lazy">
-                <span class="specimen-risk-badge risk-high">高风险</span>
-              </div>
-              <div class="specimen-info">
-                <strong>凤眼莲</strong>
-                <em>Pontederia crassipes</em>
-                <span>植物 · 极易爆发成灾</span>
-              </div>
-            </article>
-
-            <article class="specimen-cell">
-              <div class="specimen-thumb">
-                <img src="assets/species-016.jpg" alt="非洲大蜗牛" width="220" height="165" loading="lazy">
-                <span class="specimen-risk-badge risk-high">高风险</span>
-              </div>
-              <div class="specimen-info">
                 <strong>非洲大蜗牛</strong>
-                <em>Lissachatina fulica</em>
-                <span>动物 · 危害作物与人畜健康</span>
+                <em>Achatina fulica</em>
+                <span>动物 · 危害作物 · 寄生虫中间宿主</span>
               </div>
             </article>
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-017.jpg" alt="刺萼龙葵" width="220" height="165" loading="lazy">
-                <span class="specimen-risk-badge risk-high">高风险</span>
+                <img src="assets/species-017.webp" alt="尼罗罗非鱼" width="220" height="165" loading="lazy">
+                <span class="specimen-risk-badge risk-mid">中风险</span>
               </div>
               <div class="specimen-info">
-                <strong>刺萼龙葵</strong>
-                <em>Solanum rostratum</em>
-                <span>植物 · 带刺有毒侵占草场</span>
+                <strong>尼罗罗非鱼</strong>
+                <em>Oreochromis niloticus</em>
+                <span>鱼类 · 养殖逃逸挤占本土鱼生态位</span>
               </div>
             </article>
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-018.jpg" alt="飞机草" width="220" height="165" loading="lazy">
+                <img src="assets/species-018.webp" alt="大藻（水浮莲）" width="220" height="165" loading="lazy">
                 <span class="specimen-risk-badge risk-high">高风险</span>
               </div>
               <div class="specimen-info">
-                <strong>飞机草</strong>
-                <em>Chromolaena odorata</em>
-                <span>植物 · 强烈化感排挤林地</span>
+                <strong>大藻（水浮莲）</strong>
+                <em>Pistia stratiotes</em>
+                <span>水生植物 · 覆盖水面致水体缺氧</span>
               </div>
             </article>
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-019.jpg" alt="大米草" width="220" height="165" loading="lazy">
-                <span class="specimen-risk-badge risk-high">高风险</span>
+                <img src="assets/species-019.webp" alt="刺苋" width="220" height="165" loading="lazy">
+                <span class="specimen-risk-badge risk-mid">中风险</span>
               </div>
               <div class="specimen-info">
-                <strong>大米草</strong>
-                <em>Spartina anglica</em>
-                <span>植物 · 淤塞港道促淤灾害</span>
+                <strong>刺苋</strong>
+                <em>Amaranthus spinosus</em>
+                <span>植物 · 茎具锐刺 · 与作物争水肥</span>
               </div>
             </article>
 
             <article class="specimen-cell">
               <div class="specimen-thumb">
-                <img src="assets/species-020.jpg" alt="毒麦" width="220" height="165" loading="lazy">
-                <span class="specimen-risk-badge risk-high">高风险</span>
+                <img src="assets/species-020.webp" alt="椰心叶甲" width="220" height="165" loading="lazy">
+                <span class="specimen-risk-badge risk-mid">中风险</span>
               </div>
               <div class="specimen-info">
-                <strong>毒麦</strong>
-                <em>Lolium temulentum</em>
-                <span>植物 · 麦田寄生真菌毒素</span>
+                <strong>椰心叶甲</strong>
+                <em>Brontispa longissima</em>
+                <span>昆虫 · 钻蛀棕榈心叶致枯死</span>
               </div>
             </article>
           </div>
@@ -2297,27 +2302,27 @@
             </div>
             <div class="badges-row">
               <div class="badge-item">
-                <img src="assets/badge-newbie.png" alt="Newbie 徽章" width="52" height="52" loading="lazy">
+                <img src="assets/badge-newbie.webp" alt="Newbie 徽章" width="52" height="52" loading="lazy">
                 <strong>初级观察员 (Newbie)</strong>
                 <span>默认等级 · 每日限 5 条</span>
               </div>
               <div class="badge-item">
-                <img src="assets/badge-ecoguard.png" alt="Eco Guard 徽章" width="52" height="52" loading="lazy">
+                <img src="assets/badge-ecoguard.webp" alt="Eco Guard 徽章" width="52" height="52" loading="lazy">
                 <strong>生态卫士 (Eco Guard)</strong>
                 <span>5 次核实 · 每日限 10 条</span>
               </div>
               <div class="badge-item">
-                <img src="assets/badge-contributor.png" alt="Contributor 徽章" width="52" height="52" loading="lazy">
+                <img src="assets/badge-contributor.webp" alt="Contributor 徽章" width="52" height="52" loading="lazy">
                 <strong>核心贡献者</strong>
                 <span>20 次核实 · +5 质量加成</span>
               </div>
               <div class="badge-item">
-                <img src="assets/badge-expert.png" alt="Expert 徽章" width="52" height="52" loading="lazy">
+                <img src="assets/badge-expert.webp" alt="Expert 徽章" width="52" height="52" loading="lazy">
                 <strong>物种专家 (Expert)</strong>
                 <span>50 次核实 · 开放 CSV 导出</span>
               </div>
               <div class="badge-item">
-                <img src="assets/badge-species.png" alt="Species 徽章" width="52" height="52" loading="lazy">
+                <img src="assets/badge-species.webp" alt="Species 徽章" width="52" height="52" loading="lazy">
                 <strong>新发现者 (Species)</strong>
                 <span>发现区域新物种记录荣誉</span>
               </div>
@@ -2507,8 +2512,8 @@
           <div class="arch-tier-card">
             <span class="arch-tier-label">质量保障层</span>
             <span class="arch-tier-name">Jest 自动化测试</span>
-            <span class="arch-tier-desc">73 个单元与端到端测试用例全绿通过，严密覆盖图片 MD5 去重、时空网格排重、JWT 私有接口隔离与积分奖惩分支。</span>
-            <span class="arch-tier-metric">73 Tests All Passed</span>
+            <span class="arch-tier-desc">73+ 单元与端到端测试用例，覆盖图片 MD5 去重、时空网格排重、JWT 私有接口隔离与积分奖惩分支。，</span>
+            <span class="arch-tier-metric">73+ Test Cases</span>
           </div>
         </div>
       </div>
@@ -2553,14 +2558,11 @@
   </main>
 
   <!-- 引入 GSAP 和 ScrollTrigger 库 -->
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+  <script src="assets/vendor/gsap.min.js"></script>
+  <script src="assets/vendor/ScrollTrigger.min.js"></script>
 
   <script>
-    // 注册 GSAP ScrollTrigger 插件
-    gsap.registerPlugin(ScrollTrigger);
-
-    // 移动端汉堡菜单交互
+    // 移动端汉堡菜单交互（不依赖任何动画库，保证极端网络环境下导航永远可用）
     const menuToggleBtn = document.getElementById("menuToggleBtn");
     const mobileDrawer = document.getElementById("mobileDrawer");
     const drawerBackdrop = document.getElementById("drawerBackdrop");
@@ -2597,6 +2599,10 @@
         toggleMobileMenu();
       }
     });
+
+    // GSAP 动画增强（本地 vendor 加载失败时优雅降级：内容默认可见，仅无入场动效）
+    if (window.gsap && window.ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
 
     // 媒体查询与动画控制
     const mm = gsap.matchMedia();
@@ -2695,6 +2701,7 @@
         window.removeEventListener("pointermove", onPointerMove);
       };
     });
+    }
   </script>
 </body>
 </html>
